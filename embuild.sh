@@ -1,4 +1,6 @@
 #!/bin/bash
+hash scons 2>/dev/null || { echo >&2 "ERROR: scons not found. Please install scons."; exit 1; }
+hash python 2>/dev/null || { echo >&2 "ERROR: python not found. Please install python."; exit 1; }
 # Huh?? Why we suddenly start needing pwd here?
 pushd ~/emsdk && pwd && source emsdk_env.sh && popd
 emscons scons -j 4 $@
