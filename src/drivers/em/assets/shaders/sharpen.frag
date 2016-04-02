@@ -43,14 +43,10 @@ varying vec2 v_uv[5];
 void main()
 {
 	vec3 color = vec3(0.0);
-	// Sharpening done in linear color space. Output is linear.
-// TODO: test encode gamma
-	for (int i = 0; i < 5; i++) {
+	// Sharpening in linear color space.
+	for (int i = 0; i < 5; ++i) {
 		vec3 tmp = texture2D(u_rgbTex, v_uv[i]).rgb;
 		color += u_sharpenKernel[i] * tmp*tmp;
-//		color += u_sharpenKernel[i] * texture2D(u_rgbTex, v_uv[i]).rgb;
 	}
-	gl_FragColor = vec4(sqrt(color), 1.0);
-// TODO: test encode gamma
-//	gl_FragColor = vec4(color, 1.0);
+	gl_FragColor = vec4(sqrt(max(color, 0.0)), 1.0);
 }

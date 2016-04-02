@@ -21,7 +21,7 @@ void main ()
   color_1 = (color_1 + ((u_sharpenKernel[4] * tmpvar_6.xyz) * tmpvar_6.xyz));
   lowp vec4 tmpvar_7;
   tmpvar_7.w = 1.0;
-  tmpvar_7.xyz = sqrt(color_1);
+  tmpvar_7.xyz = sqrt(max (color_1, 0.0));
   gl_FragColor = tmpvar_7;
 }
 
