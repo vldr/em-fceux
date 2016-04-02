@@ -17,8 +17,8 @@ void main ()
 {
   lowp vec3 color_1;
   lowp vec3 ds1_2;
-  lowp vec4 tmpvar_3;
-  tmpvar_3 = texture2D (u_noiseTex, v_noiseUVs[0]);
+  lowp float noiseHF_3;
+  noiseHF_3 = texture2D (u_noiseTex, v_noiseUVs[0]).x;
   lowp vec4 tmpvar_4;
   tmpvar_4 = texture2D (u_downsample1Tex, v_uv);
   lowp vec4 tmpvar_5;
@@ -35,32 +35,31 @@ void main ()
    * 
     sqrt(abs(((2.0 * texture2D (u_noiseTex, v_noiseUVs[1]).x) - 1.0)))
   )));
-  highp vec3 tmpvar_7;
-  tmpvar_7 = normalize(v_norm);
-  highp float result_8;
+  highp vec3 N_7;
+  N_7 = normalize(v_norm);
+  highp float tmpvar_8;
   highp vec3 tmpvar_9;
   tmpvar_9 = normalize((u_lightDir + normalize(
     (u_viewPos - v_pos)
   )));
   highp float tmpvar_10;
-  tmpvar_10 = dot (tmpvar_7, u_lightDir);
+  tmpvar_10 = dot (N_7, u_lightDir);
   if ((tmpvar_10 > 0.0)) {
-    result_8 = (mix (u_material.x, (u_material.y * 
-      pow (max (dot (tmpvar_7, tmpvar_9), 0.0), u_material.z)
+    tmpvar_8 = (mix (u_material.x, (u_material.y * 
+      pow (max (dot (N_7, tmpvar_9), 0.0), u_material.z)
     ), (u_fresnel.x + 
       (u_fresnel.y * pow ((1.0 - tmpvar_10), u_fresnel.z))
     )) * tmpvar_10);
   } else {
-    result_8 = (-(tmpvar_10) * u_material.w);
+    tmpvar_8 = (-(tmpvar_10) * u_material.w);
   };
-  result_8 = (result_8 * (0.21 + (0.79 * 
-    clamp ((38.0 * max ((
-      dot (u_shadowPlane.xyz, v_pos)
-     - u_shadowPlane.w), (v_pos.z - 0.023))), 0.0, 1.0)
-  )));
   lowp vec4 tmpvar_11;
   tmpvar_11.w = 1.0;
-  tmpvar_11.xyz = (sqrt((color_1 + result_8)) + (0.01171875 * (tmpvar_3.x - 0.5)));
+  tmpvar_11.xyz = (sqrt((color_1 + 
+    (tmpvar_8 * (0.21 + (0.79 * clamp (
+      (38.0 * max ((dot (u_shadowPlane.xyz, v_pos) - u_shadowPlane.w), (v_pos.z - 0.023)))
+    , 0.0, 1.0))))
+  )) + (0.01171875 * (noiseHF_3 - 0.5)));
   gl_FragColor = tmpvar_11;
 }
 

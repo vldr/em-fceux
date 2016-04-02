@@ -3,6 +3,8 @@
 glslopt=../glsl-optimizer/glslopt
 srcdir=src/drivers/em/assets/shaders
 dstdir=src/drivers/em/assets/data
+commonf=$srcdir/common
+tempf=$srcdir/$RANDOM.tmp
 if [ ! -f $glslopt ]
 then
 echo "GLSL shader optimizer not found at: " $glslopt
@@ -15,7 +17,8 @@ for f in $srcdir/*.vert
 do
 dstf=$dstdir/${f##*/}
 echo $f " -> " $dstf
-$glslopt -v -2 $f $dstf
+cat $commonf $f > $tempf
+$glslopt -v -2 $tempf $dstf
 done
 
 echo "Building fragment shaders:"
@@ -23,6 +26,8 @@ for f in $srcdir/*.frag
 do
 dstf=$dstdir/${f##*/}
 echo $f " -> " $dstf
-$glslopt -f -2 $f $dstf
+cat $commonf $f > $tempf
+$glslopt -f -2 $tempf $dstf
 done
 
+rm $tempf
