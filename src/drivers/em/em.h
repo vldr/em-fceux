@@ -120,10 +120,20 @@ enum FCEM_Controller {
 #define GAMMA_NTSC 2.44
 #define GAMMA_SRGB 2.2
 
+// 64 palette colors, 8 color de-emphasis settings.
+#define NUM_COLORS  (64 * 8)
+// Lookup width must be POT >= NUM_PHASES*NUM_TAPS*NUM_SUBPS, ex. 3*5*4=60 -> 64
+#define LOOKUP_W    64
+#define INPUT_W     256 // Width of input PPU image by fceux (in px).
+#define INPUT_H     240 // Height of input PPU image by fceux (in px).
+
 // The rate of output and emulated (internal) audio (frequency, in Hz).
 extern int em_sound_rate;
 // Number of audio samples per frame.
 extern int em_sound_frame_samples;
+
+// Number of scanlines to show in current video mode: NTSC -> 224, PAL -> 240.
+extern int em_scanlines;
 
 extern int eoptions;
 
@@ -178,6 +188,7 @@ void DrawSplash();
 
 void canvas2DRender(uint8 *pixels, uint8 *row_deemp);
 void canvas2DInit();
+void canvas2DVideoChanged();
 
 int LoadGame(const char *path);
 int CloseGame(void);

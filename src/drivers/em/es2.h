@@ -2,6 +2,11 @@
 #define _ES2_H_
 #include "es2util.h"
 
+// Set overscan on left and right sides as 12px (total 24px).
+#define OVERSCAN_W  12
+#define IDX_W       (INPUT_W + 2*OVERSCAN_W)
+#define IDX_H       INPUT_H
+
 typedef enum t_es2_unif {
 U_NONE = -1,
 #define U(prog_, id_, name_) U_ ## id_,
@@ -24,7 +29,15 @@ typedef struct t_es2_uniforms
 	GLint _stretch_scanlines_loc;
 	GLint _stretch_smoothenOffs_loc;
 
+    GLint _screen_uv_scale_loc;
+    GLint _screen_border_uv_offs_loc;
+    GLint _screen_mvp_loc;
+
+    GLint _tv_mvp_loc;
+
 	GLint _combine_glow_loc;
+
+    GLint _direct_v_scale_loc;
 
 } es2_uniforms;
 
@@ -84,6 +97,7 @@ int es2Init(double aspect);
 void es2UpdateController(int idx, double v);
 void es2Deinit();
 void es2SetViewport(int width, int height);
+void es2VideoChanged();
 void es2Render(GLubyte *pixels, GLubyte *row_deemp, GLubyte overscan_color);
 
 #endif

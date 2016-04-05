@@ -3,6 +3,7 @@ uniform vec3 u_viewPos;
 uniform vec4 u_material;
 uniform vec3 u_fresnel;
 uniform vec4 u_shadowPlane;
+uniform vec2 u_borderUVOffs;
 
 uniform sampler2D u_stretchTex;
 uniform sampler2D u_noiseTex;
@@ -26,8 +27,7 @@ void main()
 //	color += 0.018 * texture2D(u_stretchTex, v_uv - 0.021*N.xy).rgb;
 
 	// Set black if outside the border
-//	vec2 uvd = max(abs(v_uv - 0.5) - vec2(128.0-6.5, 112.0-3.5) / vec2(IDX_W, IDX_H), 0.0);
-	vec2 uvd = max(abs(v_uv - 0.5) - 0.5 * vec2(1.0 - 9.5/INPUT_W, 1.0 - 7.0/IDX_H), 0.0);
+	vec2 uvd = max(abs(v_uv - 0.5) - u_borderUVOffs, 0.0);
 	float border = clamp(3.0 - 3.0*3000.0 * dot(uvd, uvd), 0.0, 1.0);
 	color *= border;
 

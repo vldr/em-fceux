@@ -253,10 +253,15 @@ void FCEM_SetController(int idx, double v)
 		WrapBindPort(1, (int) v);
 		break;
 	case FCEM_VIDEO_SYSTEM:
+		//printf("!!!!! VIDEO_SYSTEM: %f\n", v);
 		if (v <= -1) {
 			FCEUI_SetVidSystem(iNESDetectVidSys()); // Attempt auto-detection.
 		} else if (v <= 1) {
 			FCEUI_SetVidSystem(v);
+		}
+		if (!GameInfo) {
+			// This is only when game is not yet loaded...
+			FCEUD_VideoChanged();
 		}
 		break;
 	case FCEM_WEBGL_ENABLED:

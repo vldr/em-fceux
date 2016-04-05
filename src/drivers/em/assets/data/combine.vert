@@ -6,6 +6,6 @@ void main ()
 {
   gl_Position = a_0;
   v_uv = a_2;
-  v_noiseUV = (vec2(4.0, 3.5) * a_2);
+  v_noiseUV = (vec2(4.0, 3.75) * a_2);
 }
 

@@ -25,21 +25,13 @@
 // Possible values: 1 or 2, corresponding to 1x and 2x.
 #define CANVAS_SCALER 2
 #define CANVAS_W (CANVAS_SCALER * 256)
-#define CANVAS_H (CANVAS_SCALER * 224)
+#define CANVAS_H (CANVAS_SCALER * em_scanlines)
 
-
-// Init software canvas rendering.
-// TODO: tsone: following must match with es2.cpp
-#define NUM_COLORS	(64 * 8)
-#define LOOKUP_W	64
-#define INPUT_H		240
-#define IDX_H		224
-#define INPUT_ROW_OFFS	((INPUT_H-IDX_H) / 2)
 
 extern void genNTSCLookup();
 extern double *yiqs;
 
-// TODO: tsone: following must match with shaders.h
+// TODO: tsone: following must match with shaders common
 static const double c_convMat[] = {
 	1.0,        1.0,        1.0,       // Y
 	0.946882,   -0.274788,  -1.108545, // I
@@ -52,23 +44,23 @@ static uint32 *tmpBuf = 0;
 
 void canvas2DRender(uint8 *pixels, uint8* row_deemp)
 {
-#if CANVAS_SCALER == 1
-	int k = 256 * INPUT_ROW_OFFS;
+	int row_offs = (INPUT_H - em_scanlines) / 2;
+
+	int k = INPUT_W * row_offs;
 	int m = 0;
-	for (int row = INPUT_ROW_OFFS; row < 224 + INPUT_ROW_OFFS; ++row) {
+#if CANVAS_SCALER == 1
+	for (int row = row_offs; row < em_scanlines + row_offs; ++row) {
 		int deemp = row_deemp[row] << 1;
-		for (int x = 256; x != 0; --x) {
+		for (int x = INPUT_W; x != 0; --x) {
 			tmpBuf[m] = lookupRGBA[pixels[k] + deemp];
 			++m;
 			++k;
 		}
 	}
 #else
-	int k = 256 * INPUT_ROW_OFFS;
-	int m = 0;
-	for (int row = INPUT_ROW_OFFS; row < 224 + INPUT_ROW_OFFS; ++row) {
+	for (int row = row_offs; row < em_scanlines + row_offs; ++row) {
 		int deemp = row_deemp[row] << 1;
-		for (int x = 256; x != 0; --x) {
+		for (int x = INPUT_W; x != 0; --x) {
 			tmpBuf[m] = tmpBuf[m + 1] = tmpBuf[m + CANVAS_W]
 				= tmpBuf[m+1 + CANVAS_W]
 				= lookupRGBA[pixels[k] + deemp];
@@ -102,8 +94,19 @@ void canvas2DRender(uint8 *pixels, uint8* row_deemp)
 			}
 		}
 
-		FCEM.ctx.putImageData(FCEM.image, 0, 0);
+		Module.ctx2D.putImageData(FCEM.image, 0, 0);
 	}, (ptrdiff_t) tmpBuf >> 2);
+}
+
+void canvas2DVideoChanged()
+{
+	//printf("!!!! canvas2DVideoChanged(): %dx%d\n", CANVAS_W, CANVAS_H);
+	EM_ASM_ARGS({
+		var canvas = Module.canvas2D;
+		canvas.width = canvas.widthNative = $0;
+		canvas.height = canvas.heightNative = $1;
+		FCEM.image = Module.ctx2D.getImageData(0, 0, $0, $1);
+	}, CANVAS_W, CANVAS_H);
 }
 
 void canvas2DInit()
@@ -131,10 +134,12 @@ void canvas2DInit()
 		var canvas = Module.canvas;
 		canvas.width = canvas.widthNative = $0;
 		canvas.height = canvas.heightNative = $1;
-		FCEM.ctx = Module.createContext(canvas, false, true);
-		FCEM.image = FCEM.ctx.getImageData(0, 0, $0, $1);
+		Module.ctx = Module.createContext(canvas, false, true);
+		FCEM.image = Module.ctx.getImageData(0, 0, $0, $1);
+		Module.canvas2D = Module.canvas;
+		Module.ctx2D = Module.ctx;
 	}, CANVAS_W, CANVAS_H);
 
-	tmpBuf = (uint32*) malloc(sizeof(uint32) * CANVAS_W*CANVAS_H);
+	tmpBuf = (uint32*) malloc(sizeof(uint32) * CANVAS_SCALER*CANVAS_SCALER * INPUT_W*INPUT_H);
 }
 

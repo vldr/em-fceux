@@ -6,9 +6,8 @@
 #define _OVERSCAN_W	12
 #define _INPUT_W	256
 #define _INPUT_H	240
-#define _INPUT_ROW_OFFS	((_INPUT_H-_IDX_H) / 2)
 #define _IDX_W		(_INPUT_W + 2*_OVERSCAN_W)
-#define _IDX_H		224
+#define _IDX_H		240
 #define _NOISE_W	256
 #define _NOISE_H	256
 #define _RGB_W		(_NUM_SUBPS * _IDX_W)
@@ -25,7 +24,6 @@
 #define OVERSCAN_W	float(_OVERSCAN_W)
 #define INPUT_W		float(_INPUT_W)
 #define INPUT_H		float(_INPUT_H)
-#define INPUT_ROW_OFFS	float(_INPUT_ROW_OFFS)
 #define IDX_W		float(_IDX_W)
 #define IDX_H		float(_IDX_H)
 #define NOISE_W		float(_NOISE_W)
@@ -37,6 +35,14 @@
 #define CW2		float(_CW2)
 
 #define M_PI		3.14159265359
+
+uniform vec3 u_mouse;
+
+const mat3 c_convMat = mat3(
+	1.0,        1.0,        1.0,       // Y
+	0.946882,   -0.274788,  -1.108545, // I
+	0.623557,   -0.635691,  1.709007   // Q
+);
 
 float fakeShadow(const vec3 p, const vec4 shadowPlane)
 {

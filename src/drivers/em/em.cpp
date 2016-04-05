@@ -42,6 +42,8 @@ bool turbo;
 int eoptions = 0;
 Config *g_config;
 
+int em_scanlines = 224; // Default is NTSC, 224.
+
 static int s_status = 0;
 
 /**

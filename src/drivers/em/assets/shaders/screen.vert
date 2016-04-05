@@ -12,7 +12,7 @@ varying vec2 v_noiseUV;
 
 void main()
 {
-	v_uv = 0.5 + u_uvScale.xy * (a_2 - 0.5);
+	v_uv = 0.5 + u_uvScale * (a_2 - 0.5);
 	v_norm = a_1;
 	v_pos = a_0.xyz;
 // TODO: tsone: duplicated (screen, tv), manual homogenization

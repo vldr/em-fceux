@@ -15,7 +15,7 @@ void main ()
     (tmpvar_3 - 1.0)
   , 0.0), (u_scanlines * 
     (1.0 - abs(sin((
-      (703.7168 * v_uv[0].y)
+      (753.9822 * v_uv[0].y)
      - 0.3926991))))
   )));
   gl_FragColor = tmpvar_4;

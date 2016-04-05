@@ -41,7 +41,7 @@ void main ()
   tmpvar_7.zw = vec2(0.0, 1.0);
   tmpvar_7.xy = (gl_Position.xy / gl_Position.w);
   gl_Position = tmpvar_7;
-  v_noiseUVs[0] = ((vec2(1024.0, 896.0) * (
+  v_noiseUVs[0] = ((vec2(1024.0, 960.0) * (
     (tmpvar_7.xy * 0.5)
    + 0.5)) / vec2(256.0, 256.0));
   v_noiseUVs[1] = ((0.707 * v_noiseUVs[0]) + vec2(0.001953125, 0.001953125));

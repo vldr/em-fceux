@@ -3,6 +3,7 @@ uniform highp vec3 u_viewPos;
 uniform highp vec4 u_material;
 uniform highp vec3 u_fresnel;
 uniform highp vec4 u_shadowPlane;
+uniform highp vec2 u_borderUVOffs;
 uniform sampler2D u_stretchTex;
 uniform sampler2D u_noiseTex;
 varying highp vec2 v_uv;
@@ -24,7 +25,7 @@ void main ()
   highp vec2 tmpvar_6;
   tmpvar_6 = max ((abs(
     (v_uv - 0.5)
-  ) - vec2(0.4814453, 0.484375)), 0.0);
+  ) - u_borderUVOffs), 0.0);
   highp float tmpvar_7;
   tmpvar_7 = clamp ((3.0 - (9000.0 * 
     dot (tmpvar_6, tmpvar_6)

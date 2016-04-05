@@ -32,7 +32,7 @@
 #define ARRAY_SIZE(a_) (sizeof(a_) / sizeof(*(a_)))
 
 // TODO: tsone: set elsewhere?
-#define DBG_MODE 1
+#define DBG_MODE 0
 #if DBG_MODE
 #define DBG(x_) x_;
 #else
@@ -68,24 +68,9 @@
 #define BLACK       0.518
 #define WHITE       HIGHEST
 
-#define DEFINE(name_) "#define " #name_ " float(" STR(name_) ")\n"
-
-// 64 palette colors, 8 color de-emphasis settings.
-#define NUM_COLORS	(64 * 8)
 #define NUM_PHASES	3
 #define NUM_SUBPS	4
 #define NUM_TAPS	5
-// Lookup width must be POT >= NUM_PHASES*NUM_TAPS*NUM_SUBPS, ex. 3*5*4=60 -> 64
-#define LOOKUP_W	64
-// Set overscan on left and right sides as 12px (total 24px).
-#define OVERSCAN_W	12
-#define INPUT_W		256 // Width of input PPU image by fceux (in px).
-#define INPUT_H		240 // Height of input PPU image by fceux (in px).
-// Row offset from input PPU image to idx image.
-// TODO: tsone: *Possibly* required to be multiple of 3 (for sawtooth artifact) but it seems to work without...?
-#define INPUT_ROW_OFFS	((INPUT_H-IDX_H) / 2)
-#define IDX_W		(INPUT_W + 2*OVERSCAN_W)
-#define IDX_H		224
 #define NOISE_W		256
 #define NOISE_H		256
 #define RGB_W		(NUM_SUBPS * IDX_W)
@@ -98,10 +83,10 @@
 // Square wave generator as function of NES pal chroma index and phase.
 #define IN_COLOR_PHASE(color_, phase_) (((color_) + (phase_)) % 12 < 6)
 
-#include "shaders.h"
-
 static es2 s_p;
 static es2_uniforms s_u;
+
+static const char common_src[] = "precision mediump float;\n";
 
 static const GLint mesh_quad_vert_num = 4;
 static const GLint mesh_quad_face_num = 2;
@@ -400,6 +385,7 @@ static void updateUniformsDebug()
 	glGetIntegerv(GL_CURRENT_PROGRAM, &prog);
 	int k = glGetUniformLocation(prog, "u_mouse");
 	GLfloat mouse[3] = { MouseData[0], MouseData[1], MouseData[2] };
+	//printf("!!!!! mouse: %f, %f, %f\n", mouse[0], mouse[1], mouse[2]);
 	glUniform3fv(k, 1, mouse);
 }
 #endif
@@ -452,9 +438,16 @@ static void updateUniformsStretch()
 	DBG(updateUniformsDebug())
 }
 
-static void updateUniformsScreen()
+static void updateUniformsScreen(int video_changed)
 {
 	DBG(updateUniformsDebug())
+
+	if (video_changed) {
+		glUniform2f(s_u._screen_uv_scale_loc, 1.0 + 25.0/INPUT_W,
+			(em_scanlines/240.0) * (1.0 + 15.0/INPUT_H));
+		glUniform2f(s_u._screen_border_uv_offs_loc, 0.5 * (1.0 - 9.5/INPUT_W),
+			0.5 * (1.0 - (7.0 + INPUT_H - em_scanlines) / INPUT_H));
+	}
 }
 
 static void updateUniformsDownsample(int w, int h, int texIdx, int isHorzPass)
@@ -476,7 +469,6 @@ static void updateUniformsDownsample(int w, int h, int texIdx, int isHorzPass)
 	glUniform1i(s_u._downsample_downsampleTex_loc, texIdx);
 }
 
-// TODO: tsone: not necessary?
 static void updateUniformsTV()
 {
 	DBG(updateUniformsDebug())
@@ -487,9 +479,12 @@ static void updateUniformsCombine()
 	DBG(updateUniformsDebug())
 }
 
-static void updateUniformsDirect()
+static void updateUniformsDirect(int video_changed)
 {
 	DBG(updateUniformsDebug())
+	if (video_changed) {
+		glUniform1f(s_u._direct_v_scale_loc, em_scanlines / 240.0f);
+	}
 }
 
 static const char* s_unif_names[] =
@@ -586,14 +581,14 @@ static void initUniformsScreen()
 	glUniform1i(k, STRETCH_I);
 	k = glGetUniformLocation(prog, "u_noiseTex");
 	glUniform1i(k, NOISE_I);
-	k = glGetUniformLocation(prog, "u_uvScale");
-	glUniform2f(k, 1.0 + 25.0/INPUT_W, 1.0 + 15.0/IDX_H);
 	k = glGetUniformLocation(prog, "u_mvp");
 	glUniformMatrix4fv(k, 1, GL_FALSE, s_p.mvp_mat);
 
 	initShading(prog, 4.0, 0.001, 0.0, 0.065, 41, 0.04, 4);
 
-	updateUniformsScreen();
+	s_u._screen_uv_scale_loc = glGetUniformLocation(prog, "u_uvScale");
+	s_u._screen_border_uv_offs_loc = glGetUniformLocation(prog, "u_borderUVOffs");
+	updateUniformsScreen(1);
 }
 
 static void initUniformsTV()
@@ -655,6 +650,9 @@ static void initUniformsDirect()
 
 	k = glGetUniformLocation(prog, "u_tex");
 	glUniform1i(k, STRETCH_I);
+
+	s_u._direct_v_scale_loc = glGetUniformLocation(prog, "u_vScale");
+	updateUniformsDirect(1);
 }
 
 static void passRGB()
@@ -713,7 +711,7 @@ static void passScreen()
 	glBindFramebuffer(GL_FRAMEBUFFER, s_p.tv_fb);
 	glViewport(0, 0, SCREEN_W, SCREEN_H);
 	glUseProgram(s_p.screen_prog);
-	updateUniformsScreen();
+	updateUniformsScreen(0);
 	meshRender(&s_p.screen_mesh);
 }
 
@@ -742,7 +740,7 @@ static void passDirect()
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	glViewport(s_p.viewport[0], s_p.viewport[1], s_p.viewport[2], s_p.viewport[3]);
 	glUseProgram(s_p.direct_prog);
-	updateUniformsDirect();
+	updateUniformsDirect(0);
 	meshRender(&s_p.quad_mesh);
 }
 
@@ -987,13 +985,21 @@ void es2SetViewport(int width, int height)
 	s_p.viewport[3] = height;
 }
 
+void es2VideoChanged()
+{
+	glUseProgram(s_p.screen_prog);
+	updateUniformsScreen(1);
+
+	glUseProgram(s_p.direct_prog);
+	updateUniformsDirect(1);
+}
+
 void es2Render(GLubyte *pixels, GLubyte *row_deemp, GLubyte overscan_color)
 {
 	// Update input pixels.
 	glActiveTexture(TEX(IDX_I));
 	glBindTexture(GL_TEXTURE_2D, s_p.idx_tex);
-	glTexSubImage2D(GL_TEXTURE_2D, 0, OVERSCAN_W, 0, IDX_W-2*OVERSCAN_W, IDX_H, GL_LUMINANCE, GL_UNSIGNED_BYTE,
-			pixels + INPUT_W * INPUT_ROW_OFFS);
+	glTexSubImage2D(GL_TEXTURE_2D, 0, OVERSCAN_W, 0, IDX_W-2*OVERSCAN_W, IDX_H, GL_LUMINANCE, GL_UNSIGNED_BYTE, pixels);
 	if (s_p.overscan_color != overscan_color) {
 		s_p.overscan_color = overscan_color;
 //		printf("overscan: %02X\n", overscan_color);
@@ -1007,8 +1013,7 @@ void es2Render(GLubyte *pixels, GLubyte *row_deemp, GLubyte overscan_color)
 	// Update input de-emphasis rows.
 	glActiveTexture(TEX(DEEMP_I));
 	glBindTexture(GL_TEXTURE_2D, s_p.deemp_tex);
-	glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, IDX_H, 1, GL_LUMINANCE, GL_UNSIGNED_BYTE,
-			row_deemp + INPUT_ROW_OFFS);
+	glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, IDX_H, 1, GL_LUMINANCE, GL_UNSIGNED_BYTE, row_deemp);
 
 	passRGB();
 	passSharpen();

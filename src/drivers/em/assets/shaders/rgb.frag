@@ -14,12 +14,6 @@ varying vec2 v_uv;
 varying vec2 v_deemp_uv;
 varying vec2 v_noiseUV;
 
-const mat3 c_convMat = mat3(
-	1.0,        1.0,        1.0,       // Y
-	0.946882,   -0.274788,  -1.108545, // I
-	0.623557,   -0.635691,  1.709007   // Q
-);
-
 #define RESCALE(v_) ((v_) * (u_maxs-u_mins) + u_mins)
 
 void main()

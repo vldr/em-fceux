@@ -11,7 +11,7 @@ void main ()
   tmpvar_1.y = 0.0;
   tmpvar_1.x = a_2.y;
   v_deemp_uv = tmpvar_1;
-  v_noiseUV = ((vec2(1.09375, 0.875) * a_2) + u_noiseRnd);
+  v_noiseUV = ((vec2(1.09375, 0.9375) * a_2) + u_noiseRnd);
   gl_Position = a_0;
 }
 
