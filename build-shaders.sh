@@ -8,7 +8,7 @@ tempf=$srcdir/$RANDOM.tmp
 if [ ! -f $glslopt ]
 then
 echo "GLSL shader optimizer not found at: " $glslopt
-echo "Please configure buildshaders.sh script to point to the glslopt binary."
+echo "Please configure build-shaders.sh script to point to the glslopt binary."
 exit 1
 fi
 

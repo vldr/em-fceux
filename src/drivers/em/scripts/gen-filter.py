@@ -1,5 +1,11 @@
+#!/usr/bin/env python
 import sys, math
 class M: pass
+
+if len(sys.argv) < 3:
+  print 'tool to generate gaussian filter kernel samplers\n'
+  print 'usage: gen-filter.py <radius> <threshold>\n'
+  exit(1)
 
 # gaussian filter radius
 R = float(sys.argv[1])

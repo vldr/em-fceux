@@ -66,14 +66,14 @@ http://emscripten.org/
 Then you also need scons build tool, gzip and Python 2.7.x. Their installation
 depends on the operating system.
 
-Build the source with ./embuild.sh bash script in the em-fceux directory root.
+Build the source with ./build-emscripten.sh bash script in the em-fceux directory root.
 
 ```
 # Release build:
-./embuild.sh
+./build-emscripten.sh
 
 # Debug build:
-./embuild.sh RELEASE=0
+./build-emscripten.sh RELEASE=0
 ```
 
 After successful build, the src/drivers/em/site/ directory will contain
@@ -85,7 +85,7 @@ section.
 ### BUILD SHADERS (OPTIONAL) ###
 
 If the shaders in src/drivers/em/assets/shaders/ have been modified,
-run ./buildshaders.sh in the em-fceux root. This requires a *glslopt* binary
+run ./build-shaders.sh in the em-fceux root. This requires a *glslopt* binary
 (=glsl optimizer). Currently (28-Sep-2015) one way to get it is to build
 it from the source as follows:
 
@@ -95,13 +95,13 @@ cd ../glsl-optimizer
 cmake . && make glslopt
 ```
 
-Note, you must run ./buildshaders.sh before the ./embuild.sh script. This is because
+Note, you must run ./build-shaders.sh before the ./build-emscripten.sh script. This is because
 the shaders are copied/embedded in the file system created by the latter script.
 
 
 ### RUN / DEPLOY ###
 
-To make deployment build, run the ./embuildsite.sh in the em-fceux root.
+To make deployment build, run the ./build-site.sh in the em-fceux root.
 This will create a deployable directory in src/drivers/em/deploy/
 It contains all content for the em-fceux site.
 
@@ -109,7 +109,7 @@ To test em-fceux locally, run 'python -m SimpleHTTPServer' in the
 src/drivers/em/deploy/ directory and navigate your web browser to
 http://localhost:8000/
 
-The ./embuildsite.sh script suffixes all static site content with git file hash
+The ./build-site.sh script suffixes all static site content with git file hash
 for explicit cache/version control.
 
 Note, to take advantage of the pre-built .gz files, you must set HTTP server to
@@ -123,10 +123,10 @@ which does these things.
 
 ```
 # Build a em-fceux and the site:
-./embuild.sh && ./embuildsite.sh
+./build-emscripten.sh && ./build-site.sh
 
 # ...also build the shaders:
-./buildshaders.sh && ./embuild.sh && ./embuildsite.sh
+./build-shaders.sh && ./build-emscripten.sh && ./build-site.sh
 ```
 
 ### CONTACT ###

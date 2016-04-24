@@ -139,7 +139,7 @@ def build(srcdir, outdir):
 if __name__ == '__main__':
 	if len(sys.argv) < 3:
 		print 'tool to generate a versioned site for em-fceux\n'
-		print 'usage: buildsite.py <srcdir> <dstdir>\n'
+		print 'usage: build-site.py <srcdir> <dstdir>\n'
 		print 'srcdir - source site tree w/ index.html, generated fceux.* javascript files etc.'
 		print 'dstdir - directory to generate the versioned site'
 		exit(1)
