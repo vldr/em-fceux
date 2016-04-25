@@ -228,3 +228,13 @@ void CanvasToNESCoords(uint32 *x, uint32 *y)
 	*y = em_scanlines * (*y) / s_canvas_height;
 	*y += (INPUT_H - em_scanlines) / 2;
 }
+
+void VideoUpdateController(int idx, double v)
+{
+	if (s_webgl) {
+		es2UpdateController(idx, v);
+	} else {
+		canvas2DUpdateController(idx, v);
+	}
+}
+

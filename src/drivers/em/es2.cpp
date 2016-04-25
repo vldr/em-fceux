@@ -227,17 +227,17 @@ static void adjustYIQLimits(double *yiq)
 // Box filter kernel.
 #define BOX_FILTER(w2_, center_, x_) (fabs((x_) - (center_)) < (w2_) ? 1.0 : 0.0)
 
-double *yiqs = 0;
+double *g_yiqs = 0;
 
 // Generate NTSC YIQ lookup table
 void genNTSCLookup()
 {
-	if (yiqs) {
+	if (g_yiqs) {
 		return;
 	}
 
 	double *ys = (double*) calloc(3*8 * NUM_PHASES*NUM_COLORS, sizeof(double));
-	yiqs = (double*) calloc(3 * LOOKUP_W * NUM_COLORS, sizeof(double));
+	g_yiqs = (double*) calloc(3 * LOOKUP_W * NUM_COLORS, sizeof(double));
 
 	// Generate temporary lookup containing samplings of separated and normalized YIQ components
 	// for each phase and color combination. Separation is performed using a simulated 1D comb filter.
@@ -269,7 +269,7 @@ void genNTSCLookup()
 			for (int subp = 0; subp < NUM_SUBPS; subp++) {
 				for (int tap = 0; tap < NUM_TAPS; tap++) {
 					const int k = 3 * (color*LOOKUP_W + phase*NUM_SUBPS*NUM_TAPS + subp*NUM_TAPS + tap);
-					double *yiq = &yiqs[k];
+					double *yiq = &g_yiqs[k];
 
 					// Because of half subpixel accuracy (4 vs 8), filter twice and average.
 					for (int side = 0; side < 2; side++) { // 0:left, 1: right
@@ -316,9 +316,9 @@ void genNTSCLookup()
 		adjustYIQLimits(yiq);
 
 		const int k = 3 * (color*LOOKUP_W + LOOKUP_W-1);
-		yiqs[k+0] = yiq[0];
-		yiqs[k+1] = yiq[1];
-		yiqs[k+2] = yiq[2];
+		g_yiqs[k+0] = yiq[0];
+		g_yiqs[k+1] = yiq[1];
+		g_yiqs[k+2] = yiq[2];
 	}
 
 	free(ys);
@@ -335,7 +335,7 @@ static void genLookupTex()
 	// The conversion to bytes will lose some precision, which is unnoticeable however.
 	for (int k = 0; k < 3 * LOOKUP_W * NUM_COLORS; k+=3) {
 		for (int i = 0; i < 3; i++) {
-			const double v = (yiqs[k+i]-s_p.yiq_mins[i]) / (s_p.yiq_maxs[i]-s_p.yiq_mins[i]);
+			const double v = (g_yiqs[k+i]-s_p.yiq_mins[i]) / (s_p.yiq_maxs[i]-s_p.yiq_mins[i]);
 			result[k+i] = (unsigned char) (255.0*v + 0.5);
 		}
 	}

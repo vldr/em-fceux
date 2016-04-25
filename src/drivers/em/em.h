@@ -183,12 +183,14 @@ int InitVideo();
 int KillVideo();
 void RenderVideo(int draw_splash);
 void EnableWebGL(int enable);
+void VideoUpdateController(int idx, double v);
 
 void DrawSplash();
 
 void canvas2DRender(uint8 *pixels, uint8 *row_deemp);
 void canvas2DInit();
 void canvas2DVideoChanged();
+void canvas2DUpdateController(int idx, double v);
 
 int LoadGame(const char *path);
 int CloseGame(void);

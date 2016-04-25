@@ -29,7 +29,7 @@
 
 
 extern void genNTSCLookup();
-extern double *yiqs;
+extern double *g_yiqs;
 
 // TODO: tsone: following must match with shaders common
 static const double c_convMat[] = {
@@ -38,8 +38,39 @@ static const double c_convMat[] = {
 	0.623557,   -0.635691,  1.709007   // Q
 };
 
-static uint32 *lookupRGBA = 0;
-static uint32 *tmpBuf = 0;
+static uint32 *s_lookupRGBA = 0;
+static uint32 *s_tmpBuf = 0;
+
+
+static void canvas2DRecalcLookup()
+{
+	// TODO: valtteri: refactor out the reused parameter calculations?
+	const double u_gamma = GAMMA_NTSC/GAMMA_SRGB + 0.3*GetController(FCEM_GAMMA);
+	const double u_brightness = 0.15 * GetController(FCEM_BRIGHTNESS);
+	const double u_contrast = 1.0 + 0.4*GetController(FCEM_CONTRAST);
+	const double u_color = 1.0 + GetController(FCEM_COLOR);
+
+	for (int color = 0; color < NUM_COLORS; ++color) {
+		const int k = 3 * (color*LOOKUP_W + LOOKUP_W-1);
+		double yiq[3] = { g_yiqs[k+0], g_yiqs[k+1], g_yiqs[k+2] };
+		double rgb[3] = { 0, 0, 0 };
+
+		yiq[1] *= u_color;
+		yiq[2] *= u_color;
+
+		for (int x = 0; x < 3; ++x) {
+
+			for (int y = 0; y < 3; ++y) {
+				rgb[x] += c_convMat[3*y + x] * yiq[y];
+			}
+			rgb[x] = (rgb[x] < 0) ? 0 : rgb[x];
+			rgb[x] = u_contrast * pow(rgb[x], u_gamma) + u_brightness;
+			rgb[x] = (rgb[x] > 1) ? 1 : (rgb[x] < 0) ? 0 : rgb[x];
+			rgb[x] = 255.0*rgb[x] + 0.5;
+		}
+		s_lookupRGBA[color] = (int) rgb[0] | ((int) rgb[1] << 8) | ((int) rgb[2] << 16) | 0xFF000000;
+	}
+}
 
 
 void canvas2DRender(uint8 *pixels, uint8* row_deemp)
@@ -52,7 +83,7 @@ void canvas2DRender(uint8 *pixels, uint8* row_deemp)
 	for (int row = row_offs; row < em_scanlines + row_offs; ++row) {
 		int deemp = row_deemp[row] << 1;
 		for (int x = INPUT_W; x != 0; --x) {
-			tmpBuf[m] = lookupRGBA[pixels[k] + deemp];
+			s_tmpBuf[m] = s_lookupRGBA[pixels[k] + deemp];
 			++m;
 			++k;
 		}
@@ -61,9 +92,9 @@ void canvas2DRender(uint8 *pixels, uint8* row_deemp)
 	for (int row = row_offs; row < em_scanlines + row_offs; ++row) {
 		int deemp = row_deemp[row] << 1;
 		for (int x = INPUT_W; x != 0; --x) {
-			tmpBuf[m] = tmpBuf[m + 1] = tmpBuf[m + CANVAS_W]
-				= tmpBuf[m+1 + CANVAS_W]
-				= lookupRGBA[pixels[k] + deemp];
+			s_tmpBuf[m] = s_tmpBuf[m + 1] = s_tmpBuf[m + CANVAS_W]
+				= s_tmpBuf[m+1 + CANVAS_W]
+				= s_lookupRGBA[pixels[k] + deemp];
 			m += 2;
 			++k;
 		}
@@ -95,7 +126,7 @@ void canvas2DRender(uint8 *pixels, uint8* row_deemp)
 		}
 
 		Module.ctx2D.putImageData(FCEM.image, 0, 0);
-	}, (ptrdiff_t) tmpBuf >> 2);
+	}, (ptrdiff_t) s_tmpBuf >> 2);
 }
 
 void canvas2DVideoChanged()
@@ -113,22 +144,8 @@ void canvas2DInit()
 {
 	genNTSCLookup();
 
-	const double gamma = GAMMA_NTSC / GAMMA_SRGB;
-	lookupRGBA = (uint32*) malloc(sizeof(uint32) * NUM_COLORS);
-	for (int color = 0; color < NUM_COLORS; ++color) {
-		const int k = 3 * (color*LOOKUP_W + LOOKUP_W-1);
-		double *yiq = &yiqs[k];
-		double rgb[3] = { 0, 0, 0 };
-		for (int x = 0; x < 3; ++x) {
-			for (int y = 0; y < 3; ++y) {
-				rgb[x] += c_convMat[3*y + x] * yiq[y];
-			}
-			rgb[x] = (rgb[x] > 1) ? 1 : (rgb[x] < 0) ? 0 : rgb[x];
-			rgb[x] = pow(rgb[x], gamma);
-			rgb[x] = 255.0*rgb[x] + 0.5;
-		}
-		lookupRGBA[color] = (int) rgb[0] | ((int) rgb[1] << 8) | ((int) rgb[2] << 16) | 0xFF000000;
-	}
+	s_lookupRGBA = (uint32*) malloc(sizeof(uint32) * NUM_COLORS);
+	canvas2DRecalcLookup();
 
 	EM_ASM_ARGS({
 		var canvas = Module.canvas;
@@ -140,6 +157,20 @@ void canvas2DInit()
 		Module.ctx2D = Module.ctx;
 	}, CANVAS_W, CANVAS_H);
 
-	tmpBuf = (uint32*) malloc(sizeof(uint32) * CANVAS_SCALER*CANVAS_SCALER * INPUT_W*INPUT_H);
+	s_tmpBuf = (uint32*) malloc(sizeof(uint32) * CANVAS_SCALER*CANVAS_SCALER * INPUT_W*INPUT_H);
+}
+
+void canvas2DUpdateController(int idx, double v)
+{
+	switch(idx) {
+	case FCEM_BRIGHTNESS:
+	case FCEM_CONTRAST:
+	case FCEM_COLOR:
+	case FCEM_GAMMA:
+		canvas2DRecalcLookup();
+		break;
+	default:
+		break;
+	}
 }
 

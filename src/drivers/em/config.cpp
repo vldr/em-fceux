@@ -268,8 +268,8 @@ void FCEM_SetController(int idx, double v)
 		EnableWebGL(v);
 		break;
 	default:
-		if ((idx >= FCEM_BRIGHTNESS) && (idx <= FCEM_NOISE) && webgl_supported) {
-			es2UpdateController(idx, v);
+		if ((idx >= FCEM_BRIGHTNESS) && (idx <= FCEM_NOISE)) {
+			VideoUpdateController(idx, v);
 		}
 		break;
 	}
