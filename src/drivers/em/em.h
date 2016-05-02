@@ -24,6 +24,7 @@
 #include "../common/args.h"
 #include "../common/config.h"
 #include "../common/configSys.h"
+#include "ntsc.h"
 
 // eoptions variable flags
 #define EO_NO8LIM      1
@@ -120,10 +121,6 @@ enum FCEM_Controller {
 #define GAMMA_NTSC 2.44
 #define GAMMA_SRGB 2.2
 
-// 64 palette colors, 8 color de-emphasis settings.
-#define NUM_COLORS  (64 * 8)
-// Lookup width must be POT >= NUM_PHASES*NUM_TAPS*NUM_SUBPS, ex. 3*5*4=60 -> 64
-#define LOOKUP_W    64
 #define INPUT_W     256 // Width of input PPU image by fceux (in px).
 #define INPUT_H     240 // Height of input PPU image by fceux (in px).
 

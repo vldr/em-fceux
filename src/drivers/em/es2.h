@@ -88,9 +88,6 @@ typedef struct t_es2
     GLubyte overscan_color;   // Current overscan color (background/zero color).
     GLubyte *overscan_pixels; // Temporary overscan pixels (1x240).
 
-    GLfloat yiq_mins[3];
-    GLfloat yiq_maxs[3];
-
 } es2;
 
 int es2Init(double aspect);

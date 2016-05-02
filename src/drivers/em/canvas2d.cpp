@@ -28,9 +28,6 @@
 #define CANVAS_H (CANVAS_SCALER * em_scanlines)
 
 
-extern void genNTSCLookup();
-extern double *g_yiqs;
-
 // TODO: tsone: following must match with shaders common
 static const double c_convMat[] = {
 	1.0,        1.0,        1.0,       // Y
@@ -44,6 +41,8 @@ static uint32 *s_tmpBuf = 0;
 
 static void canvas2DRecalcLookup()
 {
+	const double *yiqs = ntscGetLookup();
+
 	// TODO: valtteri: refactor out the reused parameter calculations?
 	const double u_gamma = GAMMA_NTSC/GAMMA_SRGB + 0.3*GetController(FCEM_GAMMA);
 	const double u_brightness = 0.15 * GetController(FCEM_BRIGHTNESS);
@@ -52,7 +51,7 @@ static void canvas2DRecalcLookup()
 
 	for (int color = 0; color < NUM_COLORS; ++color) {
 		const int k = 3 * (color*LOOKUP_W + LOOKUP_W-1);
-		double yiq[3] = { g_yiqs[k+0], g_yiqs[k+1], g_yiqs[k+2] };
+		double yiq[3] = { yiqs[k+0], yiqs[k+1], yiqs[k+2] };
 		double rgb[3] = { 0, 0, 0 };
 
 		yiq[1] *= u_color;
@@ -142,8 +141,6 @@ void canvas2DVideoChanged()
 
 void canvas2DInit()
 {
-	genNTSCLookup();
-
 	s_lookupRGBA = (uint32*) malloc(sizeof(uint32) * NUM_COLORS);
 	canvas2DRecalcLookup();
 
