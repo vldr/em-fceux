@@ -16,16 +16,14 @@ class Meta:
 def createRecords(path):
 	result = []
 	for dirname, dirnames, filenames in os.walk(path):
-		#for subdirname in dirnames:
-		#	print(os.path.join(dirname, subdirname))
-		
+
+		# Exclude hidden files and directories.
+		filenames = [ n for n in filenames if not n[0] == '.' ]
+		dirnames[:] = [ n for n in dirnames if not n[0] == '.' ]
+
 		for filename in filenames:
 			result.append(Meta(dir=dirname, file=filename))
 		
-		# Exclude .git directory:
-		if '.git' in dirnames:
-			dirnames.remove('.git')
-
 	return result
 
 
