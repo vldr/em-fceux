@@ -1,7 +1,7 @@
 // List of em-fceux controllers (config interface) enums.
 // Legend:
 //   CTRL(ctrlId, enumName)
-// NOTE: DO NOT CHANGE THE ORDER!
+// NOTE: DO NOT CHANGE THE ORDER! Brightness is first and noise the last *video controller*.
 CONTROLLER_PRE
 CONTROLLER( 0,  0.0, BRIGHTNESS,   "brightness")
 CONTROLLER( 1,  0.0, CONTRAST,     "contrast")

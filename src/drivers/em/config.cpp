@@ -32,6 +32,11 @@ static const ESI s_periMap[] = {
 };
 static const int s_periMapSize = sizeof(s_periMap) / sizeof(*s_periMap);
 
+// TODO: tsone: do we actually need Config at all?
+#if 0
+static Config *s_cfg = NULL;
+#endif
+
 
 /**
  * Creates the subdirectories used for saving snapshots, movies, game
@@ -68,24 +73,26 @@ static void GetBaseDirectory(std::string &dir)
 static void WrapBindPort(int portIdx, int periId)
 {
 	if (periId >= 0 && periId < s_periMapSize) {
-		BindPort(portIdx, s_periMap[periId]);
+		Input_BindPort(portIdx, s_periMap[periId]);
 	}
 }
 
 
 // returns a config structure with default options
 // also creates config base directory (ie: /home/user/.fceux as well as subdirs
-Config* InitConfig()
+void Config_Init()
 {
 	std::string dir, prefix;
-	Config *config;
 
 	GetBaseDirectory(dir);
 
 	FCEUI_SetBaseDirectory(dir.c_str());
 	CreateDirs(dir);
 
-	config = new Config(dir);
+// TODO: tsone: do we actually need Config at all?
+#if 0
+	s_cfg = new Config(dir);
+#endif
 
 // TODO: tsone: network play is disabled
 #if 0
@@ -176,39 +183,16 @@ Config* InitConfig()
 	config->addOption("SDL.Zapper.0.DeviceType", "Mouse");
 	config->addOption("SDL.Zapper.0.DeviceNum", 0);
 #endif
-
-	return config;
 }
 
-void UpdateEMUCore(Config *config)
-{
-	FCEUI_SetVidSystem(0);
-
-	FCEUI_SetGameGenie(0);
-
-	FCEUI_SetLowPass(0);
-
-	FCEUI_DisableSpriteLimitation(0);
-
-	int start = 0, end = 239;
-// TODO: tsone: can be removed? not sure what this is.. it's disabled due to #define
-#if DOING_SCANLINE_CHECKS
-	for(int i = 0; i < 2; x++) {
-		if(srendlinev[x]<0 || srendlinev[x]>239) srendlinev[x]=0;
-		if(erendlinev[x]<srendlinev[x] || erendlinev[x]>239) erendlinev[x]=239;
-	}
-#endif
-	FCEUI_SetRenderedLines(start + 8, end - 8, start, end);
-}
-
-double GetController(int idx)
+double Config_GetValue(int idx)
 {
 	assert(idx >= 0 && idx < FCEM_CONTROLLER_COUNT);
 	return s_c[idx];
 }
 
 
-// Emscripten externals
+//>> Emscripten externals
 extern "C"
 {
 
@@ -222,20 +206,6 @@ void FCEM_OnSaveGameInterval()
       FS.syncfs(FCEM.onSyncToIDB);
     });
 }
-
-// Bind a HTML5 keyCode with an input ID.
-void FCEM_BindKey(int id, int keyIdx)
-{
-	BindKey(id, keyIdx);
-}
-
-// Bind a HTML5 Gamepad API button/axis to an input ID.
-void FCEM_BindGamepad(int id, int binding)
-{
-	BindGamepad(id, binding);
-}
-
-extern int webgl_supported;
 
 // Set control value.
 void FCEM_SetController(int idx, double v)
@@ -265,11 +235,11 @@ void FCEM_SetController(int idx, double v)
 		}
 		break;
 	case FCEM_WEBGL_ENABLED:
-		EnableWebGL(v);
+		Video_EnableWebGL(v);
 		break;
 	default:
 		if ((idx >= FCEM_BRIGHTNESS) && (idx <= FCEM_NOISE)) {
-			VideoUpdateController(idx, v);
+			Video_UpdateController(idx, v);
 		}
 		break;
 	}
@@ -277,7 +247,7 @@ void FCEM_SetController(int idx, double v)
 
 void FCEM_SilenceSound(int option)
 {
-	SilenceSound(option);
+	Sound_Silence(option);
 }
 
-}
+} //<< Emscripten externals

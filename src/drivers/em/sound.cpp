@@ -29,7 +29,7 @@
 typedef float buf_t;
 typedef float mix_t;
 
-extern int EmulationPaused;
+extern int EmulationPaused; // defined in fceu.cpp
 
 int em_sound_rate = SOUND_RATE;
 int em_sound_frame_samples = SOUND_RATE / NTSC_FPS;
@@ -147,17 +147,17 @@ static void AudioCallback()
 	}
 }
 
-void SilenceSound(int option)
+void Sound_Silence(int option)
 {
 	s_silenced = option;
 }
 
-int IsSoundInitialized()
+int Sound_IsInitialized()
 {
 	return s_initialized;
 }
 
-int CreateAudioContext()
+static int AudioContextCreate()
 {
 	return EM_ASM_INT_V({
 		if (!FCEM.audioContext) {
@@ -174,9 +174,9 @@ int CreateAudioContext()
 }
 
 // Returns the sampleRate (Hz) of initialized audio context.
-int InitAudioContext()
+static int AudioContextInit()
 {
-	if (!CreateAudioContext()) {
+	if (!AudioContextCreate()) {
 		return 0;
 	}
 
@@ -196,11 +196,11 @@ int InitAudioContext()
 }
 
 
-int InitSound()
+int Sound_Init()
 {
 	int sampleRate;
 
-	if (IsSoundInitialized()) {
+	if (Sound_IsInitialized()) {
 		return 1;
 	}
 
@@ -212,7 +212,7 @@ int InitSound()
 	}
 	s_BufferRead = s_BufferWrite = s_BufferCount = 0;
 
-	sampleRate = InitAudioContext();
+	sampleRate = AudioContextInit();
 	if (!sampleRate) {
 		FCEU_dfree(s_Buffer);
 		s_Buffer = 0;
@@ -238,12 +238,12 @@ error:
 	return 0;
 }
 
-int GetSoundBufferCount(void)
+int Sound_GetBufferCount(void)
 {
 	return s_BufferCount;
 }
 
-void WriteSound(int32 *buf, int Count)
+void Sound_Write(int32 *buf, int Count)
 {
 	if (EmulationPaused || (Count <= 0)) {
 		return;
@@ -251,7 +251,7 @@ void WriteSound(int32 *buf, int Count)
 
 	int freeCount = SOUND_BUF_MAX - s_BufferCount;
 	if (Count > freeCount) {
-//		printf("!!!! WriteSound: Tried to write %d samples while buffer has %d free.\n", Count, freeCount);
+//		printf("!!!! Sound_Write: Tried to write %d samples while buffer has %d free.\n", Count, freeCount);
 		Count = freeCount;
 	}
 
@@ -303,11 +303,6 @@ void WriteSound(int32 *buf, int Count)
 #endif
 
 #endif // TEST_SINE_AT_WRITE
-}
-
-int KillSound(void)
-{
-	return 0;
 }
 
 void FCEUD_SoundVolumeAdjust(int n)

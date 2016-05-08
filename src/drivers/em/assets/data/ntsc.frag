@@ -1,7 +1,3 @@
-uniform sampler2D u_idxTex;
-uniform sampler2D u_deempTex;
-uniform sampler2D u_lookupTex;
-uniform sampler2D u_noiseTex;
 uniform highp vec3 u_mins;
 uniform highp vec3 u_maxs;
 uniform highp float u_brightness;
@@ -9,6 +5,10 @@ uniform highp float u_contrast;
 uniform highp float u_color;
 uniform highp float u_gamma;
 uniform highp float u_noiseAmp;
+uniform sampler2D u_idxTex;
+uniform sampler2D u_deempTex;
+uniform sampler2D u_lookupTex;
+uniform sampler2D u_noiseTex;
 varying vec2 v_uv[5];
 varying highp vec2 v_deemp_uv;
 varying highp vec2 v_noiseUV;
@@ -71,12 +71,16 @@ void main ()
   yiq_1 = (yiq_1 + ((texture2D (u_lookupTex, tmpvar_14).xyz * tmpvar_6) + u_mins));
   yiq_1 = (yiq_1 * vec3(0.6666667, 0.4, 0.4));
   yiq_1.x = (yiq_1.x + (u_noiseAmp * (texture2D (u_noiseTex, v_noiseUV).x - 0.5)));
-  yiq_1.yz = (yiq_1.yz * u_color);
-  lowp vec4 tmpvar_15;
-  tmpvar_15.w = 1.0;
-  tmpvar_15.xyz = clamp (((u_contrast * 
-    pow (clamp ((mat3(1.0, 1.0, 1.0, 0.946882, -0.274788, -1.108545, 0.623557, -0.635691, 1.709007) * yiq_1), 0.0, 1.0), vec3(u_gamma))
+  lowp vec3 yiq_15;
+  yiq_15.x = yiq_1.x;
+  yiq_15.yz = (yiq_1.yz * u_color);
+  lowp vec3 tmpvar_16;
+  tmpvar_16 = clamp (((u_contrast * 
+    pow (clamp ((mat3(1.0, 1.0, 1.0, 0.946882, -0.274788, -1.108545, 0.623557, -0.635691, 1.709007) * yiq_15), 0.0, 1.0), vec3(u_gamma))
   ) + u_brightness), 0.0, 1.0);
-  gl_FragColor = tmpvar_15;
+  mediump vec4 tmpvar_17;
+  tmpvar_17.w = 1.0;
+  tmpvar_17.xyz = tmpvar_16;
+  gl_FragColor = tmpvar_17;
 }
 

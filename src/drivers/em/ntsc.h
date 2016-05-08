@@ -30,10 +30,19 @@
 #define LOOKUP_W	64
 
 
-extern float g_yiq_mins[3];
-extern float g_yiq_maxs[3];
+struct NTSCControls
+{
+	float brightness;
+	float contrast;
+	float color;
+	float gamma;
+	float yiq_mins[3];
+	float yiq_maxs[3];
+};
 
-
+void ntscYIQ2RGB(double *rgb, const double *yiq);
+void ntscSetControls(double brightness, double contrast, double color, double gamma);
+const NTSCControls &ntscGetControls();
 const double *ntscGetLookup();
 const unsigned char *ntscGetLookupTex();
 

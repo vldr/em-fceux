@@ -33,42 +33,14 @@
 #define STATUS_INIT (1<<0)
 #define STATUS_LOAD (1<<1)
 
-extern double g_fpsScale;
-extern bool MaxSpeed;
 
-// TODO: tsone: this is used in fceu.cpp. should be probably defined there, not here?
-bool turbo;
-
-int eoptions = 0;
-Config *g_config;
-
+bool em_no_waiting = true;
 int em_scanlines = 224; // Default is NTSC, 224.
 
 static int s_status = 0;
 
-/**
- * Loads a game, given a full path/filename.  The driver code must be
- * initialized after the game is loaded, because the emulator code
- * provides data necessary for the driver code(number of scanlines to
- * render, what virtual input devices to use, etc.).
- */
-int LoadGame(const char *path)
-{
-	if (s_status & STATUS_LOAD) {
-		CloseGame();
-	}
 
-	// Pass user's autodetect setting to LoadGame().
-	int autodetect = (GetController(FCEM_VIDEO_SYSTEM) <= -1) ? 1 : 0;
-	if(!FCEUI_LoadGame(path, autodetect)) {
-		return 0;
-	}
-
-	s_status |= STATUS_LOAD;
-	return 1;
-}
-
-int CloseGame()
+static int CloseGame()
 {
 	if (!(s_status & STATUS_LOAD)) {
 		return 0;
@@ -82,6 +54,28 @@ int CloseGame()
 	return 1;
 }
 
+/**
+ * Loads a game, given a full path/filename.  The driver code must be
+ * initialized after the game is loaded, because the emulator code
+ * provides data necessary for the driver code(number of scanlines to
+ * render, what virtual input devices to use, etc.).
+ */
+static int LoadGame(const char *path)
+{
+	if (s_status & STATUS_LOAD) {
+		CloseGame();
+	}
+
+	// Pass user's autodetect setting to LoadGame().
+	int autodetect = (Config_GetValue(FCEM_VIDEO_SYSTEM) <= -1) ? 1 : 0;
+	if(!FCEUI_LoadGame(path, autodetect)) {
+		return 0;
+	}
+
+	s_status |= STATUS_LOAD;
+	return 1;
+}
+
 static void EmulateFrame(int frameskipmode)
 {
 	uint8 *gfx = 0;
@@ -90,28 +84,28 @@ static void EmulateFrame(int frameskipmode)
 
 	FCEUD_UpdateInput();
 	FCEUI_Emulate(&gfx, &sound, &ssize, frameskipmode);
-	WriteSound(sound, ssize);
+	Sound_Write(sound, ssize);
 }
 
 static int DoFrame()
 {
-	if (NoWaiting) {
+	if (em_no_waiting) {
 		for (int i = 0; i < TURBO_FRAMESKIPS; ++i) {
 			EmulateFrame(2);
 		}
 	}
 
 	// Get the number of frames to fill the audio buffer.
-	int frames = (SOUND_BUF_MAX - GetSoundBufferCount()) / em_sound_frame_samples;
+	int frames = (SOUND_BUF_MAX - Sound_GetBufferCount()) / em_sound_frame_samples;
 
 	// It's possible audio to go ahead of visuals. If so, skip all emulation for this frame.
 // TODO: tsone: this is not a good solution as it may cause unnecessary skipping in emulation
-	if (IsSoundInitialized() && frames <= 0) {
+	if (Sound_IsInitialized() && frames <= 0) {
 		return 0;
 	}
 
 	// Skip frames (video) to fill the audio buffer. Leave two frames free for next requestAnimationFrame in case they come too frequently.
-	if (IsSoundInitialized() && (frames > 3)) {
+	if (Sound_IsInitialized() && (frames > 3)) {
 		// Skip only even numbers of frames to correctly display flickering sprites.
 		frames = (frames - 3) & (~1);
 		while (frames > 0) {
@@ -138,10 +132,10 @@ static void MainLoop()
 			if (!DoFrame()) {
 				return; // Frame was not processed, skip rest of this callback.
 			} else {
-				RenderVideo(0);
+				Video_Render(0);
 			}
 		} else {
-			RenderVideo(1);
+			Video_Render(1);
 		}
 	}
 
@@ -155,8 +149,8 @@ static void MainLoop()
 
 static int DriverInitialize()
 {
-	InitVideo();
-	InitSound();
+	Video_Init();
+	Sound_Init();
 	s_status |= STATUS_INIT;
 
 	int fourscore = 0; // Set to 1 to enable FourScore.
@@ -166,17 +160,6 @@ static int DriverInitialize()
 	return 1;
 }
 
-// TODO: tsone: driver is never closed, hence DriverKill() is unused
-#if 0
-static void DriverKill()
-{
-	if (s_status & STATUS_INIT) {
-		KillVideo();
-		KillSound();
-	}
-	s_status &= ~STATUS_INIT;
-}
-#endif
 
 EMUFILE_FILE* FCEUD_UTF8_fstream(const char *fn, const char *m)
 {
@@ -214,8 +197,7 @@ int main(int argc, char *argv[])
 
 	FCEUD_Message("Starting " FCEU_NAME_AND_VERSION "...\n");
 
-	// Initialize the configuration system
-	g_config = InitConfig();
+	Config_Init();
 
 	// initialize the infrastructure
 	error = FCEUI_Initialize();
@@ -226,7 +208,20 @@ int main(int argc, char *argv[])
 	FCEUI_SetDirOverride(FCEUIOD_STATES, "fceux/sav");
 //	FCEUI_SetDirOverride(FCEUIOD_ROMS, "fceux/rom");
 
-	UpdateEMUCore(g_config);
+	FCEUI_SetVidSystem(0);
+	FCEUI_SetGameGenie(0);
+	FCEUI_SetLowPass(0);
+	FCEUI_DisableSpriteLimitation(0);
+
+	int start = 0, end = 239;
+// TODO: tsone: can be removed? not sure what this is.. it's disabled due to #define
+#if DOING_SCANLINE_CHECKS
+	for(int i = 0; i < 2; x++) {
+		if(srendlinev[x]<0 || srendlinev[x]>239) srendlinev[x]=0;
+		if(erendlinev[x]<srendlinev[x] || erendlinev[x]>239) erendlinev[x]=239;
+	}
+#endif
+	FCEUI_SetRenderedLines(start + 8, end - 8, start, end);
 
 // TODO: tsone: do not use new PPU, it's probably not working
 	int use_new_ppu = 0;
@@ -246,13 +241,11 @@ int main(int argc, char *argv[])
 	return 0;
 }
 
-// TODO: tsone: is FCEUD_GetTime() necessary?
 uint64 FCEUD_GetTime()
 {
 	return emscripten_get_now();
 }
 
-// TODO: tsone: is FCEUD_GetTimeFreq() necessary?
 uint64 FCEUD_GetTimeFreq(void)
 {
 	// emscripten_get_now() returns time in milliseconds.
@@ -285,7 +278,7 @@ bool FCEUI_AviIsRecording(void) {return false;}
 void FCEUI_UseInputPreset(int preset) {}
 bool FCEUD_PauseAfterPlayback() { return false; }
 // These are actually fine, but will be unused and overriden by the current UI code.
-void FCEUD_TurboToggle(void) { NoWaiting^= 1; }
+void FCEUD_TurboToggle() { em_no_waiting = !em_no_waiting; }
 FCEUFILE* FCEUD_OpenArchiveIndex(ArchiveScanRecord& asr, std::string &fname, int innerIndex) { return 0; }
 FCEUFILE* FCEUD_OpenArchive(ArchiveScanRecord& asr, std::string& fname, std::string* innerFilename) { return 0; }
 ArchiveScanRecord FCEUD_ScanArchive(std::string fname) { return ArchiveScanRecord(); }

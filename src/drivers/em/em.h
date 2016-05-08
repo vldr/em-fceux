@@ -26,6 +26,7 @@
 #include "../common/configSys.h"
 #include "ntsc.h"
 
+// TODO: tsone: currently unused (search input module for 'eoptions')
 // eoptions variable flags
 #define EO_NO8LIM      1
 #define EO_SUBASE      2
@@ -128,15 +129,9 @@ enum FCEM_Controller {
 extern int em_sound_rate;
 // Number of audio samples per frame.
 extern int em_sound_frame_samples;
-
 // Number of scanlines to show in current video mode: NTSC -> 224, PAL -> 240.
 extern int em_scanlines;
-
-extern int eoptions;
-
-extern int NoWaiting;
-
-extern bool replaceP2StartWithMicrophone;
+extern bool em_no_waiting;
 
 // TODO: tsone: fc extension port peripherals support
 #if PERI
@@ -169,31 +164,26 @@ extern const char *DefaultFamilyKeyBoardDevice;
 extern const int DefaultFamilyKeyBoard[FAMILYKEYBOARD_NUM_BUTTONS];
 #endif //PERI
 
-int InitSound();
-int IsSoundInitialized();
-void WriteSound(int32 *Buffer, int Count);
-int KillSound(void);
-int GetSoundBufferCount(void);
-void SilenceSound(int option);
+int  Sound_Init();
+int  Sound_IsInitialized();
+void Sound_Write(int32 *Buffer, int Count);
+int  Sound_GetBufferCount(void);
+void Sound_Silence(int option);
 
-int InitVideo();
-int KillVideo();
-void RenderVideo(int draw_splash);
-void EnableWebGL(int enable);
-void VideoUpdateController(int idx, double v);
+extern int Video_webgl_supported;
+int  Video_Init();
+void Video_Render(int draw_splash);
+void Video_EnableWebGL(int enable);
+void Video_UpdateController(int idx, double v);
+void Video_CanvasToNESCoords(uint32 *x, uint32 *y);
 
-void DrawSplash();
+void Splash_Draw();
 
-void canvas2DRender(uint8 *pixels, uint8 *row_deemp);
-void canvas2DInit();
-void canvas2DVideoChanged();
-void canvas2DUpdateController(int idx, double v);
+void Canvas2D_Init();
+void Canvas2D_VideoChanged();
+void Canvas2D_Render(uint8 *pixels, uint8 *row_deemp);
+void Canvas2D_UpdateController(int idx, double v);
 
-int LoadGame(const char *path);
-int CloseGame(void);
-uint64 FCEUD_GetTime();
-
-void CanvasToNESCoords(uint32 *x, uint32 *y);
 bool FCEUD_ShouldDrawInputAids();
 bool FCEUI_AviDisableMovieMessages();
 bool FCEUI_AviEnableHUDrecording();
@@ -201,21 +191,15 @@ void FCEUI_SetAviEnableHUDrecording(bool enable);
 bool FCEUI_AviDisableMovieMessages();
 void FCEUI_SetAviDisableMovieMessages(bool disable);
 
-Config *InitConfig(void);
-void UpdateEMUCore(Config *);
-double GetController(int idx);
+void Config_Init();
+double  Config_GetValue(int idx);
 extern "C" {
 void FCEM_SetController(int idx, double v);
 }
 
-extern uint32 MouseData[3];
-int ButtonConfigBegin();
-void ButtonConfigEnd();
-
-void RegisterCallbacksForCanvas();
-void BindKey(int id, int keyIdx);
-void BindGamepad(int id, int binding);
-void BindPort(int portIdx, ESI peri);
+extern uint32 Input_mouse[3];
+void Input_RegisterCallbacksForCanvas();
+void Input_BindPort(int portIdx, ESI peri);
 void FCEUD_UpdateInput(void);
 
 

@@ -42,11 +42,49 @@
 
 static double *s_yiqs = 0;
 static unsigned char *s_lookup_tex = 0;
+static NTSCControls s_c = {
+	.yiq_mins = {  1e9f,  1e9f,  1e9f },
+	.yiq_maxs = { -1e9f, -1e9f, -1e9f }
+};
 
 
-float g_yiq_mins[3] = {  1e9f,  1e9f,  1e9f };
-float g_yiq_maxs[3] = { -1e9f, -1e9f, -1e9f };
+// TODO: tsone: following must match with shaders common
+static const double c_convMat[] = {
+	1.0,        1.0,        1.0,       // Y
+	0.946882,   -0.274788,  -1.108545, // I
+	0.623557,   -0.635691,  1.709007   // Q
+};
+void ntscYIQ2RGB(double *rgb, const double *yiq)
+{
+	double y = yiq[0];
+	double i = yiq[1] * s_c.color;
+	double q = yiq[2] * s_c.color;
 
+	double r = c_convMat[0]*y + c_convMat[3]*i + c_convMat[6]*q;
+	double g = c_convMat[1]*y + c_convMat[4]*i + c_convMat[7]*q;
+	double b = c_convMat[2]*y + c_convMat[5]*i + c_convMat[8]*q;
+
+	r = s_c.contrast * pow((r < 0) ? 0 : r, s_c.gamma) + s_c.brightness;
+	g = s_c.contrast * pow((g < 0) ? 0 : g, s_c.gamma) + s_c.brightness;
+	b = s_c.contrast * pow((b < 0) ? 0 : b, s_c.gamma) + s_c.brightness;
+
+	rgb[0] = (r > 1) ? 1 : (r < 0) ? 0 : r;
+	rgb[1] = (g > 1) ? 1 : (g < 0) ? 0 : g;
+	rgb[2] = (b > 1) ? 1 : (b < 0) ? 0 : b;
+}
+
+void ntscSetControls(double brightness, double contrast, double color, double gamma)
+{
+	s_c.brightness = brightness;
+	s_c.contrast = contrast;
+	s_c.color = color;
+	s_c.gamma = gamma;
+}
+
+const NTSCControls &ntscGetControls()
+{
+	return s_c;
+}
 
 // This source code is modified from original at:
 // http://wiki.nesdev.com/w/index.php/NTSC_video
@@ -54,7 +92,7 @@ float g_yiq_maxs[3] = { -1e9f, -1e9f, -1e9f };
 // Inputs:
 //   pixel = Pixel color (9-bit) given as input. Bitmask format: "eeellcccc".
 //   phase = Signal phase. It is a variable that increases by 8 each pixel.
-static double NTSCsignal(int pixel, int phase)
+static double ntscSignalLevel(int pixel, int phase)
 {
 	// Voltage levels, relative to synch voltage
 	const float levels[8] = {
@@ -116,13 +154,13 @@ static void comb1D(double *result, double level0, double level1, double x)
 static void adjustYIQLimits(double *yiq)
 {
 	for (int i = 0; i < 3; i++) {
-		g_yiq_mins[i] = fmin(g_yiq_mins[i], yiq[i]);
-		g_yiq_maxs[i] = fmax(g_yiq_maxs[i], yiq[i]);
+		s_c.yiq_mins[i] = fmin(s_c.yiq_mins[i], yiq[i]);
+		s_c.yiq_maxs[i] = fmax(s_c.yiq_maxs[i], yiq[i]);
 	}
 }
 
-// Generate NTSC YIQ lookup table
-void ntscGenLookupInternal()
+// Generate NTSC YIQ lookup table. Does it only once at startup.
+static void ntscPrepareLookupInternal()
 {
 	if (s_yiqs) {
 		return;
@@ -146,8 +184,8 @@ void ntscGenLookupInternal()
 			// Here we store the eight (8) generated YIQ samples for the pixel.
 			for (int s = 0; s < 8; s++) {
 				// Obtain NTSC signal level from PPU color generator for both fields.
-				double level0 = NTSCsignal(color, phase0+s);
-				double level1 = NTSCsignal(color, phase1+s);
+				double level0 = ntscSignalLevel(color, phase0+s);
+				double level1 = ntscSignalLevel(color, phase1+s);
 				comb1D(&ys[i], level0, level1, shift + s);
 				i += 3;
 			}
@@ -177,7 +215,7 @@ void ntscGenLookupInternal()
 							double mc = BOX_FILTER(CW2, kernel_center, x) / (2.0*8.0);
 							// Lookup YIQ signal level and accumulate.
 							i = 3 * (8*(color + phase*NUM_COLORS) + s);
-							yiq[0] += my * ys[i+0];
+							yiq[0] += my * ys[i  ];
 							yiq[1] += mc * ys[i+1];
 							yiq[2] += mc * ys[i+2];
 						}
@@ -196,8 +234,8 @@ void ntscGenLookupInternal()
 		double yiq[3] = {0, 0, 0};
 
 		for (int s = 0; s < 12; s++) {
-			double level0 = NTSCsignal(color, s) / 12.0;
-			double level1 = NTSCsignal(color, s+6) / 12.0; // Perfect chroma cancellation.
+			double level0 = ntscSignalLevel(color, s  ) / 12.0;
+			double level1 = ntscSignalLevel(color, s+6) / 12.0; // Perfect chroma cancellation.
 			double t[3];
 			comb1D(t, level0, level1, shift + s);
 			yiq[0] += t[0];
@@ -208,7 +246,7 @@ void ntscGenLookupInternal()
 		adjustYIQLimits(yiq);
 
 		const int k = 3 * (color*LOOKUP_W + LOOKUP_W-1);
-		s_yiqs[k+0] = yiq[0];
+		s_yiqs[k  ] = yiq[0];
 		s_yiqs[k+1] = yiq[1];
 		s_yiqs[k+2] = yiq[2];
 	}
@@ -218,7 +256,7 @@ void ntscGenLookupInternal()
 
 const double *ntscGetLookup()
 {
-        ntscGenLookupInternal();
+        ntscPrepareLookupInternal();
 	return s_yiqs;
 }
 
@@ -227,7 +265,7 @@ const unsigned char *ntscGetLookupTex()
 	if (s_lookup_tex) {
 		return s_lookup_tex;
 	}
-        ntscGenLookupInternal();
+        ntscPrepareLookupInternal();
 
 	unsigned char *result = (unsigned char*) calloc(3 * LOOKUP_W * NUM_COLORS, sizeof(unsigned char));
 	s_lookup_tex = result;
@@ -236,7 +274,7 @@ const unsigned char *ntscGetLookupTex()
 	// The conversion to bytes will lose some precision, which is unnoticeable however.
 	for (int k = 0; k < 3 * LOOKUP_W * NUM_COLORS; k+=3) {
 		for (int i = 0; i < 3; i++) {
-			const double v = (s_yiqs[k+i]-g_yiq_mins[i]) / (g_yiq_maxs[i]-g_yiq_mins[i]);
+			const double v = (s_yiqs[k+i]-s_c.yiq_mins[i]) / (s_c.yiq_maxs[i]-s_c.yiq_mins[i]);
 			result[k+i] = (unsigned char) (255.0*v + 0.5);
 		}
 	}
