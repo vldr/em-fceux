@@ -80,13 +80,13 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
       <tr><td colspan="2"><h4>NTSC EMULATION</h4>
       <tr><td>NTSC Emulation*<td><input id="ntsc_emu" type="checkbox" checked oninput="FCEM.setLocalController(NTSC_EMU, this.checked)" onchange="FCEM.setLocalController(NTSC_EMU, this.checked)"/><label for="ntsc_emu"></label>
       <tr><td>Sharpness<td><input id="sharpness" type="range" min="-0.5" max="0.5" step="0.1" oninput="FCEM.setLocalController(SHARPNESS, this.value)" onchange="FCEM.setLocalController(SHARPNESS, this.value)"/>
+      <tr><td>Signal Noise<td><input id="noise" type="range" min="0" max="1" step="0.1" oninput="FCEM.setLocalController(NOISE, this.value)" onchange="FCEM.setLocalController(NOISE, this.value)"/><br/>
 
       <tr><td colspan="2"><h4>TV EMULATION</h4>
       <tr><td>TV Emulation<td><input id="crt_enabled" type="checkbox" checked oninput="FCEM.setLocalController(CRT_ENABLED, this.checked)" onchange="FCEM.setLocalController(CRT_ENABLED, this.checked)"/><label for="crt_enabled"></label><br/>
       <tr><td>Scanlines<td><input id="scanlines" type="range" min="0" max="1" step="0.1" oninput="FCEM.setLocalController(SCANLINES, this.value)" onchange="FCEM.setLocalController(SCANLINES, this.value)"/><br/>
       <tr><td>Glow<td><input id="glow" type="range" min="0" max="1" step="0.1" oninput="FCEM.setLocalController(GLOW, this.value)" onchange="FCEM.setLocalController(GLOW, this.value)"/><br/>
       <tr><td>Convergence<td><input id="convergence" type="range" min="0" max="1" step="0.1" oninput="FCEM.setLocalController(CONVERGENCE, this.value)" onchange="FCEM.setLocalController(CONVERGENCE, this.value)"/><br/>
-      <tr><td>Signal Noise<td><input id="noise" type="range" min="0" max="1" step="0.1" oninput="FCEM.setLocalController(NOISE, this.value)" onchange="FCEM.setLocalController(NOISE, this.value)"/><br/>
 
       <tr><td colspan="2"><h4>SYSTEM SETTINGS</h4>
       <tr><td>Controller Port 1<td><select disabled><option>Gamepad</option></select>
