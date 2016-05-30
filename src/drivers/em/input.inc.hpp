@@ -5,7 +5,7 @@ Listing of all em-fceux inputs.
 An input is defined with the following macro:
 
   INPUT(inputId, defaultKeyBinding, defaultGamepadBinding, enumName, description)
- 
+
 Parameter details:
 
   inputId - The unique ID of the input (enumeration value).
@@ -60,7 +60,6 @@ INPUT(0x0216, 0x000, 0x00, GAMEPAD1_LEFT, "Left (Controller 2)")
 INPUT(0x0217, 0x000, 0x00, GAMEPAD1_RIGHT, "Right (Controller 2)")
 INPUT(0x0218, 0x000, 0x00, GAMEPAD1_TURBO_A, "Turbo A (Controller 2)")
 INPUT(0x0219, 0x000, 0x00, GAMEPAD1_TURBO_B, "Turbo B (Controller 2)")
-#if 0
 // Controller 3
 INPUT(0x0220, 0x000, 0x00, GAMEPAD2_A, "A (Controller 3)")
 INPUT(0x0221, 0x000, 0x00, GAMEPAD2_B, "B (Controller 3)")
@@ -83,5 +82,4 @@ INPUT(0x0236, 0x000, 0x00, GAMEPAD3_LEFT, "Left (Controller 4)")
 INPUT(0x0237, 0x000, 0x00, GAMEPAD3_RIGHT, "Right (Controller 4)")
 INPUT(0x0238, 0x000, 0x00, GAMEPAD3_TURBO_A, "Turbo A (Controller 4)")
 INPUT(0x0239, 0x000, 0x00, GAMEPAD3_TURBO_B, "Turbo B (Controller 4)")
-#endif
 INPUT_POST

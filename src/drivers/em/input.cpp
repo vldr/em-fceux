@@ -287,7 +287,7 @@ static void UpdateSystem()
 
 static bool IsGamepadAxisActive(const EmscriptenGamepadEvent *p, int idx, int positive_axis)
 {
-	if (idx < p->numAxes) {
+	if (p->connected && idx < p->numAxes) {
 		if (positive_axis) {
 			return (p->axis[idx] >=  GAMEPAD_THRESHOLD);
 		} else {
@@ -300,7 +300,7 @@ static bool IsGamepadAxisActive(const EmscriptenGamepadEvent *p, int idx, int po
 
 static bool IsGamepadButtonActive(const EmscriptenGamepadEvent *p, int idx)
 {
-	if (idx < p->numButtons) {
+	if (p->connected && idx < p->numButtons) {
 		return (p->digitalButton[idx] || (p->analogButton[idx] >= GAMEPAD_THRESHOLD));
 	} else {
 		return false;
@@ -336,10 +336,8 @@ static void UpdateGamepad(void)
 	// Four possibly connected joysticks/gamepads are read here.
 	EmscriptenGamepadEvent gamepads[4];
 	for (i = 4 - 1; i >= 0; --i) {
-		if (EMSCRIPTEN_RESULT_SUCCESS != emscripten_get_gamepad_status(i, &gamepads[i])) {
-			// Set as disconnected if query failed.
-			gamepads[i].connected = 0;
-		}
+		gamepads[i].connected = (EMSCRIPTEN_RESULT_SUCCESS
+			== emscripten_get_gamepad_status(i, &gamepads[i]));
 	}
 
 	// Transfer gamepad state to inputs. Gamepad API doesn't send button/axis events,
@@ -355,7 +353,7 @@ static void UpdateGamepad(void)
 	for (i = 0; i < 4; ++i) {
 		bool left = false;
 		bool up = false;
-                int inputBase = FCEM_GAMEPAD + FCEM_GAMEPAD_SIZE*i;
+		int inputBase = FCEM_GAMEPAD + FCEM_GAMEPAD_SIZE*i;
 
 		for (x = 0; x < 8; ++x) {
 			if (IsInput(inputBase + x)) {
@@ -559,4 +557,3 @@ const unsigned int *GetKeyboard()
 void FCEUD_MovieRecordTo() {}
 void FCEUD_SaveStateAs() {}
 void FCEUD_LoadStateFrom() {}
-
