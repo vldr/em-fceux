@@ -759,7 +759,7 @@ void ES2_VideoChanged()
 	updateUniformsDirect(1);
 }
 
-void ES2_Render(GLubyte *pixels, GLubyte *row_deemp, GLubyte overscan_color)
+void ES2_Render(uint8 *pixels, uint8 *row_deemp, uint8 overscan_color)
 {
 	// Update input pixels.
 	glActiveTexture(TEX(IDX_I));

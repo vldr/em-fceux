@@ -94,6 +94,6 @@ int ES2_Init(double aspect);
 void ES2_UpdateController(int idx, double v);
 void ES2_SetViewport(int width, int height);
 void ES2_VideoChanged();
-void ES2_Render(GLubyte *pixels, GLubyte *row_deemp, GLubyte overscan_color);
+void ES2_Render(uint8 *pixels, uint8 *row_deemp, uint8 overscan_color);
 
 #endif

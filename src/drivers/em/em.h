@@ -181,7 +181,7 @@ void Splash_Draw();
 
 void Canvas2D_Init();
 void Canvas2D_VideoChanged();
-void Canvas2D_Render(uint8 *pixels, uint8 *row_deemp);
+void Canvas2D_Render(uint8 *pixels, uint8 *row_deemp, uint8 overscan_color);
 void Canvas2D_UpdateController(int idx, double v);
 
 bool FCEUD_ShouldDrawInputAids();

@@ -150,7 +150,7 @@ void Video_Render(int draw_splash)
 	if (s_webgl) {
 		ES2_Render(XBuf, deempScan, PALRAM[0]);
 	} else {
-		Canvas2D_Render(XBuf, deempScan);
+		Canvas2D_Render(XBuf, deempScan, PALRAM[0]);
 	}
 }
 
@@ -241,4 +241,3 @@ void Video_UpdateController(int idx, double v)
 
 	CallUpdateController(idx, v);
 }
-
