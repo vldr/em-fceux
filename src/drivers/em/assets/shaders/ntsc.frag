@@ -7,7 +7,7 @@ varying vec2 v_uv[int(NUM_TAPS)];
 varying vec2 v_deemp_uv;
 varying vec2 v_noiseUV;
 
-#define P(i_)  p = floor(IDX_W * v_uv[i_])
+#define P(i_)  p = floor(vec2(IDX_W, IDX_H) * v_uv[i_])
 #define U(i_)  (mod(p.x - p.y, 3.0)*NUM_SUBPS*NUM_TAPS + subp*NUM_TAPS + float(i_)) / (LOOKUP_W-1.0)
 #define V(i_)  ((255.0/511.0) * texture2D(u_idxTex, v_uv[i_]).r + deemp)
 #define UV(i_) uv = vec2(U(i_), V(i_))

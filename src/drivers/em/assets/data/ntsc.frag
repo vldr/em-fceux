@@ -20,7 +20,7 @@ void main ()
   highp float tmpvar_3;
   tmpvar_3 = (float(mod (floor((1120.0 * v_uv[2].x)), 4.0)));
   highp vec2 tmpvar_4;
-  tmpvar_4 = floor((280.0 * v_uv[0]));
+  tmpvar_4 = floor((vec2(280.0, 240.0) * v_uv[0]));
   lowp vec2 tmpvar_5;
   tmpvar_5.x = (((20.0 * 
     (float(mod ((tmpvar_4.x - tmpvar_4.y), 3.0)))
@@ -30,7 +30,7 @@ void main ()
   tmpvar_6 = (u_maxs - u_mins);
   yiq_1 = ((texture2D (u_lookupTex, tmpvar_5).xyz * tmpvar_6) + u_mins);
   highp vec2 tmpvar_7;
-  tmpvar_7 = floor((280.0 * v_uv[1]));
+  tmpvar_7 = floor((vec2(280.0, 240.0) * v_uv[1]));
   lowp vec2 tmpvar_8;
   tmpvar_8.x = (((
     (20.0 * (float(mod ((tmpvar_7.x - tmpvar_7.y), 3.0))))
@@ -40,7 +40,7 @@ void main ()
   tmpvar_8.y = ((0.4990215 * texture2D (u_idxTex, v_uv[1]).x) + tmpvar_2);
   yiq_1 = (yiq_1 + ((texture2D (u_lookupTex, tmpvar_8).xyz * tmpvar_6) + u_mins));
   highp vec2 tmpvar_9;
-  tmpvar_9 = floor((280.0 * v_uv[2]));
+  tmpvar_9 = floor((vec2(280.0, 240.0) * v_uv[2]));
   lowp vec2 tmpvar_10;
   tmpvar_10.x = (((
     (20.0 * (float(mod ((tmpvar_9.x - tmpvar_9.y), 3.0))))
@@ -50,7 +50,7 @@ void main ()
   tmpvar_10.y = ((0.4990215 * texture2D (u_idxTex, v_uv[2]).x) + tmpvar_2);
   yiq_1 = (yiq_1 + ((texture2D (u_lookupTex, tmpvar_10).xyz * tmpvar_6) + u_mins));
   highp vec2 tmpvar_11;
-  tmpvar_11 = floor((280.0 * v_uv[3]));
+  tmpvar_11 = floor((vec2(280.0, 240.0) * v_uv[3]));
   lowp vec2 tmpvar_12;
   tmpvar_12.x = (((
     (20.0 * (float(mod ((tmpvar_11.x - tmpvar_11.y), 3.0))))
@@ -60,7 +60,7 @@ void main ()
   tmpvar_12.y = ((0.4990215 * texture2D (u_idxTex, v_uv[3]).x) + tmpvar_2);
   yiq_1 = (yiq_1 + ((texture2D (u_lookupTex, tmpvar_12).xyz * tmpvar_6) + u_mins));
   highp vec2 tmpvar_13;
-  tmpvar_13 = floor((280.0 * v_uv[4]));
+  tmpvar_13 = floor((vec2(280.0, 240.0) * v_uv[4]));
   lowp vec2 tmpvar_14;
   tmpvar_14.x = (((
     (20.0 * (float(mod ((tmpvar_13.x - tmpvar_13.y), 3.0))))
