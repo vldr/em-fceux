@@ -60,7 +60,7 @@ Notable *unsupported* FCEUX features:
 
 em-fceux can be built under Linux or Unix. Windows is not currently supported.
 
-First install Emscripten (tested on: 1.34.6, 1.32.0) by following instructions in:
+First install Emscripten (tested to work on version: 1.35.0) by following instructions in:
 http://emscripten.org/
 
 Then you also need scons build tool, gzip and Python 2.7.x. Their installation
@@ -78,16 +78,16 @@ Build the source with ./build-emscripten.sh bash script in the em-fceux director
 
 After successful build, the src/drivers/em/site/ directory will contain
 the em-fceux "binaries": fceux.js, fceux.js.mem, fceux.data and their respective
-gzipped versions. To deploy and test, please follow the steps in the RUN / DEPLOY
-section.
+precompressed gzipped versions for serving. To deploy and test, please follow
+the steps in the RUN / DEPLOY section.
 
 
 ### BUILD SHADERS (OPTIONAL) ###
 
-If the shaders in src/drivers/em/assets/shaders/ have been modified,
-run ./build-shaders.sh in the em-fceux root. This requires a *glslopt* binary
-(=glsl optimizer). Currently (28-Sep-2015) one way to get it is to build
-it from the source as follows:
+If you modify shaders in src/drivers/em/assets/shaders/ then you must also 
+run ./build-shaders.sh in the em-fceux root to optimize them. This requires
+glsl-optimizer *glslopt* binary. Currently (28-Sep-2015) one way to get it is
+to build it from the source as follows:
 
 ```
 git clone https://github.com/aras-p/glsl-optimizer.git ../glsl-optimizer
@@ -95,15 +95,16 @@ cd ../glsl-optimizer
 cmake . && make glslopt
 ```
 
-Note, you must run ./build-shaders.sh before the ./build-emscripten.sh script. This is because
-the shaders are copied/embedded in the file system created by the latter script.
+Note, this may change when glsl-optimizer gets updates. Also note, you must
+run ./build-shaders.sh before ./build-emscripten.sh script. This is because
+shaders are embedded within the file system created by the latter script.
 
 
 ### RUN / DEPLOY ###
 
 To make deployment build, run the ./build-site.sh in the em-fceux root.
 This will create a deployable directory in src/drivers/em/deploy/
-It contains all content for the em-fceux site.
+which contains all content for an em-fceux site.
 
 To test em-fceux locally, run 'python -m SimpleHTTPServer' in the
 src/drivers/em/deploy/ directory and navigate your web browser to
