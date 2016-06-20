@@ -7,23 +7,23 @@
 
 #define VARRAY_ENCODED_NORMALS 1
 
-typedef struct t_es2_varray
+typedef struct t_ES2VArray
 {
     int count;
     GLenum type;
     int flags;
     const void *data;
     GLuint _buf;
-} es2_varray;
+} ES2VArray;
 
-typedef struct t_es2_mesh
+typedef struct t_ES2Mesh
 {
-    es2_varray *varrays;
+    ES2VArray *varrays;
     int num_varrays;
     GLuint elem_buf;
     GLenum elem_type;
     int num_elems;
-} es2_mesh;
+} ES2Mesh;
 
 void vec3Set(GLfloat *c, const GLfloat *a);
 void vec3Sub(GLfloat *c, const GLfloat *a, const GLfloat *b);
@@ -48,9 +48,9 @@ void createTex(GLuint *tex, int w, int h, GLenum format, GLenum filter, GLenum w
 void deleteTex(GLuint *tex);
 void createFBTex(GLuint *tex, GLuint *fb, int w, int h, GLenum format, GLenum filter, GLenum wrap);
 void deleteFBTex(GLuint *tex, GLuint *fb);
-void createMesh(es2_mesh *p, int num_verts, int num_varrays, es2_varray *varrays, int num_elems, const void *elems);
-void deleteMesh(es2_mesh *p);
-void meshRender(es2_mesh *p);
+void createMesh(ES2Mesh *p, int num_verts, int num_varrays, ES2VArray *varrays, int num_elems, const void *elems);
+void deleteMesh(ES2Mesh *p);
+void meshRender(ES2Mesh *p);
 int *createUniqueEdges(int *num_edges, int num_verts, int num_elems, const void *elems);
 
 #endif

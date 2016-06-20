@@ -71,7 +71,7 @@ static const SplashPage s_splashPages[] =
 
 static const int s_splashNumPages = sizeof(s_splashPages) / sizeof(*s_splashPages);
 
-void DrawSplash()
+void Splash_Draw()
 {
 	char buf[128];
 

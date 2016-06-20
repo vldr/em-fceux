@@ -156,6 +156,7 @@ img.preload {
   cursor: pointer;
 }
 
+
 #controllersTab {
   position: absolute;
   top: 0;
@@ -204,12 +205,102 @@ img.preload {
   border: 0px none;
   text-align: right;
 }
+#controllers td + td {
+  text-align: center;
+}
 #controllers input, #controllers select {
   margin: 0;
   padding: 0;
   right: 0px;
-  width: 130px;
 }
+#controllers input[type=range], #controllers select  {
+  width: 132px;
+}
+
+#controllers input[type=range] {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  margin: 0;
+  padding: 0;
+  cursor: pointer;
+  border: 0;
+  border-radius: 0;
+  box-shadow: 0;
+  width: 132px;
+  height: 18px;
+  background: url('img/{{sheet.gif}}') no-repeat -38px -96px;
+}
+#controllers input[type=range]:focus {
+  outline: 0;
+}
+#controllers input[type=range]::-webkit-slider-runnable-track {
+  -webkit-appearance: none;
+  appearance: none;
+  animate: 0.2s;
+}
+#controllers input[type=range]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 12px;
+  width: 12px;
+  background: url('img/{{sheet.gif}}') no-repeat -138px -78px;
+}
+#controllers input[type=range]::-moz-range-track {
+  -moz-appearance: none;
+  appearance: none;
+  display: none;
+  animate: 0.2s;
+  background: none;
+}
+#controllers input[type=range]::-moz-range-thumb {
+  -moz-appearance: none;
+  appearance: none;
+  box-shadow: 0;
+  border: 0;
+  border-radius: 0;
+  height: 12px;
+  width: 12px;
+  background: url('img/{{sheet.gif}}') no-repeat -138px -78px;
+}
+#controllers input[type=range]::-ms-track {
+  display: none;
+  animate: 0.2s;
+}
+#controllers input[type=range]::-ms-fill-lower {
+  display: none;
+}
+#controllers input[type=range]::-ms-fill-upper {
+  display: none;
+}
+#controllers input[type=range]::-ms-thumb {
+  height: 12px;
+  width: 12px;
+  background: url('img/{{sheet.gif}}') no-repeat -138px -78px;
+}
+#controllers input[type=range]:focus::-ms-fill-lower {
+  display: none;
+}
+#controllers input[type=range]:focus::-ms-fill-upper {
+  display: none;
+}
+
+#controllers input[type=checkbox] {
+  display: none;
+  margin: 0;
+  padding: 0;
+}
+#controllers input[type=checkbox] + label {
+  display: inline-block;
+  cursor: pointer;
+  height: 18px;
+  width: 18px;
+  background: url('img/{{sheet.gif}}') no-repeat -135px -57px;
+}
+#controllers input[type=checkbox]:checked + label {
+  background: url('img/{{sheet.gif}}') no-repeat -156px -57px;
+}
+
 
 #stackTab {
   position: absolute;

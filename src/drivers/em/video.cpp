@@ -30,15 +30,17 @@
 extern uint8 *XBuf;
 extern uint8 deempScan[240];
 extern uint8 PALRAM[0x20];
-extern Config *g_config;
 
-int webgl_supported = 0;
+
+int Video_webgl_supported = 0;
+
 
 static int s_inited;
 static int s_webgl = -1;
 
 static int s_window_width, s_window_height;
 static int s_canvas_width, s_canvas_height;
+
 
 // Functions only needed for linking.
 void SetOpenGLPalette(uint8*) {}
@@ -53,22 +55,13 @@ bool FCEUD_ShouldDrawInputAids()
 	return false;
 }
 
-// Returns 0 on success, -1 on failure.
-int KillVideo()
+static void CallUpdateController(int idx, double v)
 {
-// TODO: tsone: never cleanup video?
-#if 0
-	// return failure if the video system was not initialized
-	if(s_inited == 0)
-		return -1;
-
-	// if the rest of the system has been initialized, shut it down
-	// check for OpenGL and shut it down
-	es2Deinit();
-
-	s_inited = 0;
-#endif
-	return 0;
+	if (s_webgl) {
+		ES2_UpdateController(idx, v);
+	} else {
+		Canvas2D_UpdateController(idx, v);
+	}
 }
 
 static double GetAspect()
@@ -123,9 +116,9 @@ static void Resize()
 			canvas.style.setProperty("height", $1 + "px", "important");
 		}
 
-	}, s_canvas_width, s_canvas_height, webgl_supported);
+	}, s_canvas_width, s_canvas_height, Video_webgl_supported);
 
-	es2SetViewport(s_canvas_width, s_canvas_height);
+	ES2_SetViewport(s_canvas_width, s_canvas_height);
 }
 
 void FCEUD_VideoChanged()
@@ -135,8 +128,8 @@ void FCEUD_VideoChanged()
 	em_sound_frame_samples = em_sound_rate / (FSettings.PAL ? PAL_FPS : NTSC_FPS);
 	em_scanlines = FSettings.PAL ? 240 : 224;
 
-	canvas2DVideoChanged();
-	es2VideoChanged();
+	Canvas2D_VideoChanged();
+	ES2_VideoChanged();
 	Resize();
 }
 
@@ -148,22 +141,22 @@ static EM_BOOL FCEM_ResizeCallback(int eventType, const EmscriptenUiEvent *uiEve
 	return 1;
 }
 
-void RenderVideo(int draw_splash)
+void Video_Render(int draw_splash)
 {
 	if (draw_splash) {
-		DrawSplash();
+		Splash_Draw();
 	}
 
 	if (s_webgl) {
-		es2Render(XBuf, deempScan, PALRAM[0]);
+		ES2_Render(XBuf, deempScan, PALRAM[0]);
 	} else {
-		canvas2DRender(XBuf, deempScan);
+		Canvas2D_Render(XBuf, deempScan, PALRAM[0]);
 	}
 }
 
-void EnableWebGL(int enable)
+void Video_EnableWebGL(int enable)
 {
-	enable = enable ? webgl_supported : 0;
+	enable = enable ? Video_webgl_supported : 0;
 
 	EM_ASM_ARGS({
 		if ($0) {
@@ -182,10 +175,14 @@ void EnableWebGL(int enable)
 	}, enable);
 
 	s_webgl = enable;
+
+	for (int i = FCEM_BRIGHTNESS; i <= FCEM_NOISE; ++i) {
+		CallUpdateController(i, Config_GetValue(i));
+	}
 }
 
 // Return 0 on success, -1 on failure.
-int InitVideo()
+int Video_Init()
 {
 	if (s_inited) {
 		return 0;
@@ -197,17 +194,18 @@ int InitVideo()
 
 	// Init both 2D and WebGL (3D) canvases and contexts.
 	FCEU_printf("Initializing canvas 2D context.\n");
-	canvas2DInit();
-	RegisterCallbacksForCanvas();
+	Canvas2D_Init();
+	Input_RegisterCallbacksForCanvas();
 	FCEU_printf("Initializing WebGL.\n");
-	// NOTE: Following reset of canvas and ctx is required by es2Init().
+	// NOTE: Following reset of canvas and ctx is required by ES2_Init().
 	EM_ASM({
 		Module.canvas = Module.canvas3D;
 		Module.ctx = null;
 	});
-	webgl_supported = es2Init(GetAspect());
-	if (webgl_supported) {
-		RegisterCallbacksForCanvas();
+	Video_webgl_supported = ES2_Init(GetAspect());
+	if (Video_webgl_supported) {
+		// NOTE: Register callbacks also for WebGL canvas (which is here current).
+		Input_RegisterCallbacksForCanvas();
 	}
 
 	// HACK: Manually resize to cover the window inner size.
@@ -222,19 +220,24 @@ int InitVideo()
 	return 0;
 }
 
-void CanvasToNESCoords(uint32 *x, uint32 *y)
+void Video_CanvasToNESCoords(uint32 *x, uint32 *y)
 {
 	*x = INPUT_W * (*x) / s_canvas_width;
 	*y = em_scanlines * (*y) / s_canvas_height;
 	*y += (INPUT_H - em_scanlines) / 2;
 }
 
-void VideoUpdateController(int idx, double v)
+void Video_UpdateController(int idx, double v)
 {
-	if (s_webgl) {
-		es2UpdateController(idx, v);
-	} else {
-		canvas2DUpdateController(idx, v);
+	if ((idx == FCEM_BRIGHTNESS) || (idx == FCEM_CONTRAST)
+			|| (idx == FCEM_COLOR) || (idx == FCEM_GAMMA)) {
+		ntscSetControls(
+			0.15 * Config_GetValue(FCEM_BRIGHTNESS),
+			1.0 + 0.4*Config_GetValue(FCEM_CONTRAST),
+			1.0 + Config_GetValue(FCEM_COLOR),
+			GAMMA_NTSC/GAMMA_SRGB + 0.3*Config_GetValue(FCEM_GAMMA)
+		);
 	}
-}
 
+	CallUpdateController(idx, v);
+}

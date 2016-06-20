@@ -116,7 +116,7 @@ void mat4Persp(GLfloat *p, double fovy, double aspect, double zNear, double zFar
 {
     const double f = 1.0 / tan(fovy / 2.0);
     memset(p, 0, 4*4*sizeof(GLfloat));
-    p[4*0+0] = f / aspect;
+    p[4*0  ] = f / aspect;
     p[4*1+1] = f;
     p[4*2+2] = (zNear+zFar) / (zNear-zFar);
     p[4*2+3] = -1.0;
@@ -126,11 +126,11 @@ void mat4Persp(GLfloat *p, double fovy, double aspect, double zNear, double zFar
 void mat4Trans(GLfloat *p, GLfloat *trans)
 {
     memset(p, 0, 4*4*sizeof(GLfloat));
-    p[4*0+0] = 1.0;
+    p[4*0  ] = 1.0;
     p[4*1+1] = 1.0;
     p[4*2+2] = 1.0;
     p[4*3+3] = 1.0;
-    p[4*3+0] = trans[0];
+    p[4*3  ] = trans[0];
     p[4*3+1] = trans[1];
     p[4*3+2] = trans[2];
 }
@@ -376,9 +376,9 @@ static int verts2Type(int num_verts)
     else return GL_UNSIGNED_INT;
 }
 
-void createMesh(es2_mesh *p, int num_verts, int num_varrays, es2_varray *varrays, int num_elems, const void *elems)
+void createMesh(ES2Mesh *p, int num_verts, int num_varrays, ES2VArray *varrays, int num_elems, const void *elems)
 {
-    memset(p, 0, sizeof(es2_mesh));
+    memset(p, 0, sizeof(ES2Mesh));
     p->num_varrays = num_varrays;
     p->varrays = varrays;
     p->num_elems = num_elems;
@@ -436,7 +436,7 @@ void createMesh(es2_mesh *p, int num_verts, int num_varrays, es2_varray *varrays
     }
 }
 
-void deleteMesh(es2_mesh *p)
+void deleteMesh(ES2Mesh *p)
 {
     for (int i = 0; i < p->num_varrays; i++) {
         deleteBuffer(&p->varrays[i]._buf);
@@ -444,7 +444,7 @@ void deleteMesh(es2_mesh *p)
     deleteBuffer(&p->elem_buf);
 }
 
-void meshRender(es2_mesh *p)
+void meshRender(ES2Mesh *p)
 {
     for (int i = 0; i < MAX_VARRAYS; i++) {
         if (i < p->num_varrays && p->varrays[i]._buf) {

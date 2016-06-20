@@ -78,21 +78,21 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
       <tr><td>Gamma<td><input id="gamma" type="range" min="-1" max="1" step="0.2" oninput="FCEM.setLocalController(GAMMA, this.value)" onchange="FCEM.setLocalController(GAMMA, this.value)"/>
 
       <tr><td colspan="2"><h4>NTSC EMULATION</h4>
-      <tr><td>NTSC Emulation*<td><input id="ntsc_emu" type="checkbox" checked oninput="FCEM.setLocalController(NTSC_EMU, this.checked)" onchange="FCEM.setLocalController(NTSC_EMU, this.checked)"/>
+      <tr><td>NTSC Emulation*<td><input id="ntsc_emu" type="checkbox" checked oninput="FCEM.setLocalController(NTSC_EMU, this.checked)" onchange="FCEM.setLocalController(NTSC_EMU, this.checked)"/><label for="ntsc_emu"></label>
       <tr><td>Sharpness<td><input id="sharpness" type="range" min="-0.5" max="0.5" step="0.1" oninput="FCEM.setLocalController(SHARPNESS, this.value)" onchange="FCEM.setLocalController(SHARPNESS, this.value)"/>
+      <tr><td>Signal Noise<td><input id="noise" type="range" min="0" max="1" step="0.1" oninput="FCEM.setLocalController(NOISE, this.value)" onchange="FCEM.setLocalController(NOISE, this.value)"/><br/>
 
       <tr><td colspan="2"><h4>TV EMULATION</h4>
-      <tr><td>TV Emulation<td><input id="crt_enabled" type="checkbox" checked oninput="FCEM.setLocalController(CRT_ENABLED, this.checked)" onchange="FCEM.setLocalController(CRT_ENABLED, this.checked)"/><br/>
+      <tr><td>TV Emulation<td><input id="crt_enabled" type="checkbox" checked oninput="FCEM.setLocalController(CRT_ENABLED, this.checked)" onchange="FCEM.setLocalController(CRT_ENABLED, this.checked)"/><label for="crt_enabled"></label><br/>
       <tr><td>Scanlines<td><input id="scanlines" type="range" min="0" max="1" step="0.1" oninput="FCEM.setLocalController(SCANLINES, this.value)" onchange="FCEM.setLocalController(SCANLINES, this.value)"/><br/>
       <tr><td>Glow<td><input id="glow" type="range" min="0" max="1" step="0.1" oninput="FCEM.setLocalController(GLOW, this.value)" onchange="FCEM.setLocalController(GLOW, this.value)"/><br/>
       <tr><td>Convergence<td><input id="convergence" type="range" min="0" max="1" step="0.1" oninput="FCEM.setLocalController(CONVERGENCE, this.value)" onchange="FCEM.setLocalController(CONVERGENCE, this.value)"/><br/>
-      <tr><td>Signal Noise<td><input id="noise" type="range" min="0" max="1" step="0.1" oninput="FCEM.setLocalController(NOISE, this.value)" onchange="FCEM.setLocalController(NOISE, this.value)"/><br/>
 
       <tr><td colspan="2"><h4>SYSTEM SETTINGS</h4>
       <tr><td>Controller Port 1<td><select disabled><option>Gamepad</option></select>
       <tr><td>Controller Port 2<td><select id="port2" onchange="FCEM.setLocalController(PORT2, this.value)"><option value="0">Gamepad</option><option value="1">Zapper</option></select>
       <tr><td>Video System<td><select id="video_system" onchange="FCEM.setLocalController(VIDEO_SYSTEM, this.value)"><option value="-1">(Auto)</option><option value="0">NTSC</option><option value="1">PAL</option></select>
-      <tr><td>Use WebGL<td><input id="webgl_enabled" type="checkbox" oninput="FCEM.setLocalController(WEBGL_ENABLED, this.checked)" onchange="FCEM.setLocalController(WEBGL_ENABLED, this.checked)"/>
+      <tr><td>Use WebGL<td><input id="webgl_enabled" type="checkbox" oninput="FCEM.setLocalController(WEBGL_ENABLED, this.checked)" onchange="FCEM.setLocalController(WEBGL_ENABLED, this.checked)"/><label for="webgl_enabled"></label>
     </table>
     <p><input type="button" value="Reset to Defaults" onclick="FCEM.initControllers(true)" />
     <p><i><small>* NTSC composite signal path emulation.</small></i>

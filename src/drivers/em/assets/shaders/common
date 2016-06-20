@@ -36,13 +36,32 @@
 
 #define M_PI		3.14159265359
 
+#define RESCALE(v_) ((v_) * (u_maxs-u_mins) + u_mins)
+
 uniform vec3 u_mouse;
+uniform vec3 u_mins;
+uniform vec3 u_maxs;
+uniform float u_brightness;
+uniform float u_contrast;
+uniform float u_color;
+uniform float u_gamma;
+uniform float u_noiseAmp;
 
 const mat3 c_convMat = mat3(
 	1.0,        1.0,        1.0,       // Y
 	0.946882,   -0.274788,  -1.108545, // I
 	0.623557,   -0.635691,  1.709007   // Q
 );
+
+vec3 yiq2rgb(in vec3 yiq)
+{
+	yiq.gb *= u_color;
+	vec3 result = clamp(c_convMat * yiq, 0.0, 1.0);
+	// Gamma convert RGB from NTSC space to space similar to sRGB.
+	result = pow(result, vec3(u_gamma));
+	// NOTE: While this seems to be wrong (after gamma), it works well in practice...?
+	return clamp(u_contrast * result + u_brightness, 0.0, 1.0);
+}
 
 float fakeShadow(const vec3 p, const vec4 shadowPlane)
 {

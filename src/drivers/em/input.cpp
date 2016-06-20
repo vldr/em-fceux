@@ -31,12 +31,15 @@
 #define INPUT_ACTIVE_GAMEPAD	(1 << 1)
 
 
-int NoWaiting = 1;
+extern bool em_no_waiting;
+// TODO: tsone: not currently used
+#if 0
+extern bool frameAdvanceLagSkip, lagCounterDisplay; // defined in fceu.cpp
+#endif
+extern bool replaceP2StartWithMicrophone; // defined in input.cpp (not this one)
 
-extern Config *g_config;
-extern bool frameAdvanceLagSkip, lagCounterDisplay;
 
-uint32 MouseData[3] = { 0, 0, 0 };
+uint32 Input_mouse[3] = { 0, 0, 0 };
 
 
 #if PERI
@@ -58,6 +61,7 @@ static void UpdateFTrainer (void);
 static void UpdateTopRider (void);
 #endif
 
+static int eoptions = 0;
 static uint32 JSreturn = 0;
 static int s_rapidFireFrame = 0;
 
@@ -177,9 +181,9 @@ static void UpdateSystem()
 	}
 
 // TODO: tsone: is this the right way to clear here?
-	NoWaiting &= ~1;
+	em_no_waiting &= ~1;
 	if (IsInput(FCEM_SYSTEM_THROTTLE)) {
-		NoWaiting |= 1;
+		em_no_waiting |= 1;
 	}
 
 	static bool frameAdvancing = false;
@@ -400,7 +404,7 @@ static void UpdateGamepad(void)
 static void UpdateMouse()
 {
 	if (!s_mouseReleaseFC) {
-		MouseData[2] = 0;
+		Input_mouse[2] = 0;
 	} else {
 		--s_mouseReleaseFC;
 	}
@@ -408,11 +412,11 @@ static void UpdateMouse()
 
 static EM_BOOL MouseDownCallback(int type, const EmscriptenMouseEvent *event, void *)
 {
-	MouseData[0] = event->targetX;
-	MouseData[1] = event->targetY;
-	MouseData[2] = event->buttons & 3;
+	Input_mouse[0] = event->targetX;
+	Input_mouse[1] = event->targetY;
+	Input_mouse[2] = event->buttons & 3;
 
-	CanvasToNESCoords(&MouseData[0], &MouseData[1]);
+	Video_CanvasToNESCoords(&Input_mouse[0], &Input_mouse[1]);
 
 	// Force buttons down for 3 frames. This is because mouse events are async.
 	// We need mouse buttons remain down at least one frame -- however it seems
@@ -422,7 +426,7 @@ static EM_BOOL MouseDownCallback(int type, const EmscriptenMouseEvent *event, vo
 	return 1;
 }
 
-void RegisterCallbacksForCanvas()
+void Input_RegisterCallbacksForCanvas()
 {
 	emscripten_set_mousedown_callback("#canvas", 0, 0, MouseDownCallback);
 }
@@ -457,32 +461,42 @@ static EM_BOOL KeyCallback(int eventType, const EmscriptenKeyboardEvent *event, 
 	return 1;
 }
 
-void BindKey(int id, int keyIdx)
+void Input_BindPort(int portIdx, ESI peri)
+{
+	uint32 *ptr = 0;
+
+	switch (peri) {
+	case SI_GAMEPAD: ptr = &JSreturn; break;
+	case SI_ZAPPER:  ptr = Input_mouse; break;
+	default: return;
+	}
+
+	FCEUI_SetInput(portIdx, peri, ptr, 0);
+}
+
+
+//>> Emscripten externals
+extern "C"
+{
+
+// Bind a HTML5 keyCode with an input ID.
+void FCEM_BindKey(int id, int keyIdx)
 {
 	if (id >= FCEM_NULL && id < FCEM_INPUT_COUNT && keyIdx >= 0 && keyIdx < FCEM_KEY_MAP_SIZE) {
 		s_key_map[keyIdx] = id;
 	}
 }
 
-void BindGamepad(int id, int binding)
+// Bind a HTML5 Gamepad API button/axis to an input ID.
+void FCEM_BindGamepad(int id, int binding)
 {
 	if (id >= FCEM_NULL && id < FCEM_INPUT_COUNT && binding >= 0 && binding < 256) {
 		s_gamepad_bindings[id] = binding;
 	}
 }
 
-void BindPort(int portIdx, ESI peri)
-{
-	uint32 *ptr = 0;
+} //<< Emscripten externals
 
-	switch (peri) {
-	case SI_GAMEPAD: ptr = &JSreturn; break;
-	case SI_ZAPPER:  ptr = MouseData; break;
-	default: return;
-	}
-
-	FCEUI_SetInput(portIdx, peri, ptr, 0);
-}
 
 void FCEUD_UpdateInput()
 {
@@ -520,7 +534,7 @@ void FCEUD_SetInput(bool fourscore, bool microphone, ESI, ESI, ESIFC fcexp)
 
 // TODO: tsone: make configurable by front-end
 	FCEUI_SetInput(0, SI_GAMEPAD, &JSreturn, 0);
-	FCEUI_SetInput(1, SI_ZAPPER, MouseData, 0);
+	FCEUI_SetInput(1, SI_ZAPPER, Input_mouse, 0);
 
 // TODO: tsone: support FC expansion port?
 	FCEUI_SetInputFC(fcexp, 0, 0);
