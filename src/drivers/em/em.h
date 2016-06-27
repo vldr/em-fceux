@@ -26,6 +26,9 @@
 #include "../common/configSys.h"
 #include "ntsc.h"
 
+
+#define FCEM_DEBUG 1 // Set to 0 to disable debug stuff.
+
 // TODO: tsone: currently unused (search input module for 'eoptions')
 // eoptions variable flags
 #define EO_NO8LIM      1

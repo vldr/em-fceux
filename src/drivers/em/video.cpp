@@ -188,7 +188,9 @@ int Video_Init()
 		return 0;
 	}
 
-//	FCEUI_SetShowFPS(1);
+#if FCEM_DEBUG == 1
+	FCEUI_SetShowFPS(1);
+#endif
 
 	emscripten_set_resize_callback(0, 0, 0, FCEM_ResizeCallback);
 

@@ -157,6 +157,7 @@ static void ConvertNTSCScan2(uint32 *dst, const uint8 *row_pixels, int deemp,
 	}
 }
 
+#if FCEM_DEBUG == 1
 static void print_fps()
 {
 	static int frame_count = 0;
@@ -172,10 +173,13 @@ static void print_fps()
 	}
 	++frame_count;
 }
+#endif
 
 static void ConvertNTSC2(const uint8 *pixels, const uint8* row_deemp, uint8 overscan_color)
 {
+#if FCEM_DEBUG == 1
 	print_fps();
+#endif
 
 	int row_offs = (INPUT_H - em_scanlines) / 2;
 
