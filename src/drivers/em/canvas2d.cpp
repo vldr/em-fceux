@@ -155,6 +155,26 @@ static void ConvertNTSCScan2(uint32 *dst, const uint8 *row_pixels, int deemp,
 		lk_top = (lk_top + 1) & (LK_N-1);
 		phase = (phase < NUM_PHASES-1) ? phase + 1 : 0;
 	}
+
+	// sharpen
+	for (m = 0; m < 2*INPUT_W-4; ++m) {
+		int x0 = dst[m];
+		int x1 = dst[m+2];
+		int x2 = dst[m+4];
+
+		int c0[3] = { x0 & 0xFF, x0 & 0xFF00, x0 & 0xFF0000 };
+		int c1[3] = { x1 & 0xFF, x1 & 0xFF00, x1 & 0xFF0000 };
+		int c2[3] = { x2 & 0xFF, x2 & 0xFF00, x2 & 0xFF0000 };
+
+		int r = c1[0] + (c1[0]>>1) - (c0[0]>>2) - (c2[0]>>2);
+		r = (r < 0) ? 0 : ( (r > 0xFF) ? 0xFF : r );
+		int g = c1[1] + (c1[1]>>1) - (c0[1]>>2) - (c2[1]>>2);
+		g = (g < 0) ? 0 : ( (g > 0xFF00) ? 0xFF00 : (g & 0xFF00) );
+		int b = c1[2] + (c1[2]>>1) - (c0[2]>>2) - (c2[2]>>2);
+		b = (b < 0) ? 0 : ( (b > 0xFF0000) ? 0xFF0000 : (b & 0xFF0000));
+
+		dst[m] = r | g | b | 0xFF000000;
+	}
 }
 
 #if FCEM_DEBUG == 1
