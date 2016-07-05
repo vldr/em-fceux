@@ -123,6 +123,7 @@ static const int s_downsample_heights[] = { SCREEN_H, SCREEN_H,   SCREEN_H/4,  S
 static void updateSharpenKernel()
 {
 	glUseProgram(s_p.sharpen_prog);
+	// TODO: pull out, calculated in multiple places
 	double v = Config_GetValue(FCEM_NTSC_EMU) * 0.4 * (Config_GetValue(FCEM_SHARPNESS)+0.5);
 	GLfloat sharpen_kernel[] = {
 		-v, -v, -v,
@@ -279,6 +280,11 @@ static void updateUniformsDirect(int video_changed)
 	DBG(updateUniformsDebug())
 	if (video_changed) {
 		glUniform1f(s_u._direct_v_scale_loc, em_scanlines / 240.0f);
+	}
+	if (Config_GetValue(FCEM_NTSC_EMU)) {
+		glUniform2f(s_u._direct_uv_offset_loc, -0.5f/SCREEN_W, -0.5f/SCREEN_H);
+	} else {
+		glUniform2f(s_u._direct_uv_offset_loc, 0, 0);
 	}
 }
 
@@ -447,6 +453,7 @@ static void initUniformsDirect()
 	glUniform1i(k, STRETCH_I);
 
 	s_u._direct_v_scale_loc = glGetUniformLocation(prog, "u_vScale");
+	s_u._direct_uv_offset_loc = glGetUniformLocation(prog, "u_uvOffset");
 	updateUniformsDirect(1);
 }
 

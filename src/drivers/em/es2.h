@@ -38,6 +38,7 @@ typedef struct t_ES2Uniforms
 	GLint _combine_glow_loc;
 
 	GLint _direct_v_scale_loc;
+	GLint _direct_uv_offset_loc;
 
 } ES2Uniforms;
 
