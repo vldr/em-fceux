@@ -60,6 +60,10 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
   <noscript id="noscript">
      PLEASE ENABLE JAVASCRIPT em-fceux requires JavaScript
   </noscript>
+  <script>
+    if (typeof WebAssembly !== "object")
+      window.location += "../em-fceux-asmjs/";
+  </script>
   <div id="progressDiv"><div id="progress"></div></div>
   <script>
     document.getElementById('progressDiv').style.display = 'block';
