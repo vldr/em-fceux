@@ -12,6 +12,7 @@ if env['EMSCRIPTEN']:
   source_list.remove('scale3x.cpp')
   source_list.remove('scalebit.cpp')
   source_list.remove('vidblit.cpp')
+  source_list.remove('configSys.cpp')
 
 for x in range(len(source_list)):
   source_list[x] = 'drivers/common/' + source_list[x]

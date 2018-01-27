@@ -240,6 +240,7 @@ if env['DEBUG']:
 if env['RELEASE']:
   if env['EMSCRIPTEN']:
     common = ''
+    common += ' -fno-exceptions -fno-rtti'
     common += ' -flto -Oz'
     common += ' --llvm-opts 3'
     common += ' --llvm-lto 3'
