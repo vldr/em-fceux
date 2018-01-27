@@ -241,7 +241,9 @@ if env['RELEASE']:
   if env['EMSCRIPTEN']:
     common = ''
     common += ' -flto -Oz'
-    #common += ' --llvm-lto 1' # NOTE: unstable (emscripten 1.34.6)
+    common += ' --llvm-opts 3'
+    common += ' --llvm-lto 3'
+    common += ' -s WASM=1'
     common += ' -s NO_EXIT_RUNTIME=1'
     common += ' -s AGGRESSIVE_VARIABLE_ELIMINATION=1'
     common += ' -s DISABLE_EXCEPTION_CATCHING=1'

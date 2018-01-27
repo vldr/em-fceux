@@ -81,7 +81,7 @@ def doTemplate(r, mapping):
 	_doRegexpReplace(r, re_template, lambda x: mapping[x.group(1)])
 
 # Process fceux.js file by replacing references to data and mem files
-re_special = re.compile('(?<=\Wfceux)()(?=\.(data|js\.mem))')
+re_special = re.compile('(?<=\Wfceux)()(?=\.(data|js\.mem|wasm))')
 def doSpecial(r, fallback_hash):
 	_doRegexpReplace(r, re_special, lambda x: fallback_hash)
 
@@ -132,7 +132,7 @@ def build(srcdir, outdir):
 	records = setupOutput(records, srcdir, outdir)
 	mapping = createMapping(records)
 	processRecords(records, mapping, [ 'index.html', 'style.css', 'loader.js' ], [ 'fceux.js' ], fallback_hash)
-	compressRecords(records, mapping, [ 'fceux.js', 'fceux.js.mem', 'fceux.data', 'style.css', 'loader.js' ])
+	compressRecords(records, mapping, [ 'fceux.js', 'fceux.js.mem', 'fceux.data', 'style.css', 'loader.js', 'fceux.wasm' ])
 
 if __name__ == '__main__':
 	if len(sys.argv) < 3:
