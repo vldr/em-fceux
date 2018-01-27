@@ -39,7 +39,7 @@ extern bool frameAdvanceLagSkip, lagCounterDisplay; // defined in fceu.cpp
 extern bool replaceP2StartWithMicrophone; // defined in input.cpp (not this one)
 
 
-uint32 Input_mouse[3] = { 0, 0, 0 };
+static uint32 Input_mouse[3] = { 0, 0, 0 };
 
 
 #if PERI
@@ -414,7 +414,7 @@ static EM_BOOL MouseDownCallback(int type, const EmscriptenMouseEvent *event, vo
 {
 	Input_mouse[0] = event->targetX;
 	Input_mouse[1] = event->targetY;
-	Input_mouse[2] = event->buttons & 3;
+	Input_mouse[2] = 1;
 
 	Video_CanvasToNESCoords(&Input_mouse[0], &Input_mouse[1]);
 

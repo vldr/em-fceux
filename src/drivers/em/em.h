@@ -200,7 +200,6 @@ extern "C" {
 void FCEM_SetController(int idx, double v);
 }
 
-extern uint32 Input_mouse[3];
 void Input_RegisterCallbacksForCanvas();
 void Input_BindPort(int portIdx, ESI peri);
 void FCEUD_UpdateInput(void);
