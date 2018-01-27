@@ -65,7 +65,12 @@ if 'EMSCRIPTEN_TOOL_PATH' in os.environ:
     'FCEM_BindGamepad',
     'FCEM_SilenceSound'
   ]
+  runtimeExportsList = [
+    'cwrap'
+  ]
   exports = '-s EXPORTED_FUNCTIONS=\'["_' + '","_'.join(exportsList) + '"]\''
+  env.Append(LINKFLAGS = exports)
+  exports = '-s EXTRA_EXPORTED_RUNTIME_METHODS=\'["' + '","'.join(runtimeExportsList) + '"]\''
   env.Append(LINKFLAGS = exports)
   env.Append(LINKFLAGS = '--preload-file src/drivers/em/assets/data/@/data/')
 else:

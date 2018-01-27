@@ -21,7 +21,7 @@
 #include "em.h"
 #include "../../fceu.h"
 #include "../../utils/memory.h"
-#include <html5.h>
+#include <emscripten/html5.h>
 
 
 #define GAMEPAD_THRESHOLD 0.1
