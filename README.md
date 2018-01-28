@@ -60,8 +60,8 @@ Notable *unsupported* FCEUX features:
 
 em-fceux can be built under Linux or Unix. Windows is not currently supported.
 
-First install Emscripten (tested to work on version: 1.35.0) by following instructions in:
-http://emscripten.org/
+First install emsdk to $HOME/emsdk/ and emscripten (tested to work with 1.37.28).
+Follow instructions in: http://emscripten.org/
 
 Then you also need scons build tool, gzip and Python 2.7.x. Their installation
 depends on the operating system.
@@ -76,17 +76,17 @@ Build the source with ./build-emscripten.sh bash script in the em-fceux director
 ./build-emscripten.sh RELEASE=0
 ```
 
-After successful build, the src/drivers/em/site/ directory will contain
-the em-fceux "binaries": fceux.js, fceux.js.mem, fceux.data and their respective
-precompressed gzipped versions for serving. To deploy and test, please follow
-the steps in the RUN / DEPLOY section.
+After successful build, the src/drivers/em/site/ directory will contain the em-fceux
+"binaries": fceux.js, fceux.data and fceux.wasm. Note, WebAssembly is targeted
+by default (to target asm.js, comment out '-s WASM=1' option in SConstruct).
+To deploy and test, please follow the steps in the RUN / DEPLOY section.
 
 
 ### BUILD SHADERS (OPTIONAL) ###
 
 If you modify shaders in src/drivers/em/assets/shaders/ then you must also 
 run ./build-shaders.sh in the em-fceux root to optimize them. This requires
-glsl-optimizer *glslopt* binary. Currently (28-Sep-2015) one way to get it is
+glsl-optimizer *glslopt* binary. Currently (27-Jan-2018) one way to get it is
 to build it from the source as follows:
 
 ```
@@ -110,7 +110,7 @@ To test em-fceux locally, run 'python -m SimpleHTTPServer' in the
 src/drivers/em/deploy/ directory and navigate your web browser to
 http://localhost:8000/
 
-The ./build-site.sh script suffixes all static site content with git file hash
+The ./build-site.sh script suffixes all static site content with crc32 checksum
 for explicit cache/version control.
 
 Note, to take advantage of the pre-built .gz files, you must set HTTP server to
