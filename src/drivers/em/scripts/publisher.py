@@ -28,7 +28,7 @@ class Publisher:
 
 	@staticmethod
 	def _hashed(fn, data):
-		hsh = "-{:08x}".format(zlib.adler32(data) & 0xFFFFFFFF)
+		hsh = "-{:08x}".format(zlib.crc32(data) & 0xFFFFFFFF)
 		spl = fn.split('.', 1)
 		spl[0] += hsh
 		return '.'.join(spl)
