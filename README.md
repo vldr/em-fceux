@@ -86,8 +86,8 @@ To deploy and test, please follow the steps in the RUN / DEPLOY section.
 
 If you modify shaders in src/drivers/em/assets/shaders/ then you must also 
 run ./build-shaders.sh in the em-fceux root to optimize them. This requires
-glsl-optimizer *glslopt* binary. Currently (27-Jan-2018) one way to get it is
-to build it from the source as follows:
+glslopt binary from glsl-optimizer package. Currently (27-Jan-2018) one way to
+get it is to build from source as follows:
 
 ```
 git clone https://github.com/aras-p/glsl-optimizer.git ../glsl-optimizer
