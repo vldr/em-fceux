@@ -185,7 +185,7 @@ static int AudioContextInit()
 		FCEM.scriptProcessorNode = FCEM.audioContext.createScriptProcessor($0, 0, 1);
 		FCEM.scriptProcessorNode.onaudioprocess = function(ev) {
 			FCEM.currentOutputBuffer = ev.outputBuffer;
-			Runtime.dynCall('v', $1);
+			Module.dynCall_v($1);
 		};
 		FCEM.scriptProcessorNode.connect(FCEM.audioContext.destination);
 	}, SOUND_HW_BUF_MAX, AudioCallback);
