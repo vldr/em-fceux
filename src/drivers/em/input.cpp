@@ -523,6 +523,9 @@ void FCEUD_SetInput(bool fourscore, bool microphone, ESI, ESI, ESIFC fcexp)
 
 	replaceP2StartWithMicrophone = microphone;
 
+	// Init Emscripten gamepad API.
+	emscripten_sample_gamepad_data();
+
 	// Init input state array. Fills it with zeroes.
 	FCEU_ARRAY_EM(s_input_state, uint8, FCEM_INPUT_COUNT);
 
