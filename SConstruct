@@ -249,7 +249,6 @@ if env['RELEASE']:
     common += ' -s AGGRESSIVE_VARIABLE_ELIMINATION=1'
     common += ' -s DISABLE_EXCEPTION_CATCHING=1'
     common += ' -s ASSERTIONS=0'
-    common += ' -s OUTLINING_LIMIT=25000'
     env.Append(CCFLAGS = common)
     env.Append(LINKFLAGS = common)
     env.Append(LINKFLAGS = '-strip-all')
