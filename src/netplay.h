@@ -1,5 +1,5 @@
 int InitNetplay(void);
-#ifndef EMSCRIPTEN
+#ifndef __EMSCRIPTEN__
 void NetplayUpdate(uint8 *joyp);
 extern int FCEUnetplay;
 #else
@@ -24,7 +24,7 @@ extern int FCEUnetplay;
 #define FCEUNPCMD_LOADCHEATS	0x82
 #define FCEUNPCMD_TEXT		0x90
 
-#ifndef EMSCRIPTEN
+#ifndef __EMSCRIPTEN__
 int FCEUNET_SendCommand(uint8, uint32);
 #else
 #define FCEUNET_SendCommand(...) (0) // 0 = fail

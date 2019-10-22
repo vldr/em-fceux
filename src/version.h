@@ -39,7 +39,7 @@
 
 #define FCEU_NAME "FCEUX"
 
-#ifndef EMSCRIPTEN
+#ifndef __EMSCRIPTEN__
 #define FCEU_FEATURE_STRING ""
 #else
 #define FCEU_FEATURE_STRING " (em-fceux 0.4.0) Powered by Emscripten"

@@ -5,7 +5,7 @@
 #include "movie.h"
 #include "driver.h"
 
-#ifndef EMSCRIPTEN
+#ifndef __EMSCRIPTEN__
 #define COLOR_CURSOR_BORDER 4
 #else
 #define COLOR_CURSOR_BORDER 0x20
@@ -113,7 +113,7 @@ static uint8 Font6x7[NUM_CHARS * CHAR_SIZE] =
 	6,  0,104,176,  0,  0,  0,  0
 };
 
-#ifndef EMSCRIPTEN
+#ifndef __EMSCRIPTEN__
 static uint8 sstat[2541] =
 {
 	0x80,0x80,0x80,0x80,0x80,0x80,0x80,0x80,0x80,0x80,0x80,0x80,0x80,0x80,0x80,0x80,0x80,0x80,0x80,
@@ -154,7 +154,7 @@ static uint8 sstat[2541] =
 #endif
 
 
-#ifndef EMSCRIPTEN
+#ifndef __EMSCRIPTEN__
 static uint8 play_slines[]=
 {
 	0, 0, 1,
@@ -243,10 +243,10 @@ static uint8* sline_icons[4]=
 	record_slines,
 	pause_slines
 };
-#endif //EMSCRIPTEN
+#endif //__EMSCRIPTEN__
 
 
-#ifndef EMSCRIPTEN
+#ifndef __EMSCRIPTEN__
 char target[64][256];
 #else
 static char (*target)[256] = 0;
@@ -255,7 +255,7 @@ static char (*target)[256] = 0;
 static uint8** s_decodedFont = 0;
 
 
-#ifndef EMSCRIPTEN
+#ifndef __EMSCRIPTEN__
 void DrawTextLineBG(uint8 *dest)
 {
 	int x,y;
@@ -308,7 +308,7 @@ void DrawMessage(bool beforeMovie)
 		if(t>=XBuf)
 		{
 			int color = 0x20;
-#ifndef EMSCRIPTEN
+#ifndef __EMSCRIPTEN__
 			if(guiMessage.howlong <= 40) color = 0x3C;
 			if(guiMessage.howlong <= 32) color = 0x31;
 			if(guiMessage.howlong <= 24) color = 0x21;
@@ -338,7 +338,7 @@ void DrawMessage(bool beforeMovie)
 		if(tt>=XBuf)
 		{
 			int color = 0x20;
-#ifndef EMSCRIPTEN
+#ifndef __EMSCRIPTEN__
 			if(subtitleMessage.howlong == 39) color = 0x38;
 			if(subtitleMessage.howlong <= 30) color = 0x2C;
 			if(subtitleMessage.howlong <= 20) color = 0x1C;
@@ -357,7 +357,7 @@ void DrawMessage(bool beforeMovie)
 }
 
 
-#ifndef EMSCRIPTEN
+#ifndef __EMSCRIPTEN__
 static void drawstatus(uint8* XBuf, int n, int y, int xofs)
 {
 	uint8* slines=sline_icons[n];
@@ -384,12 +384,12 @@ static void drawstatus(uint8* XBuf, int n, int y, int xofs)
 			dest[x]=4;
 	}
 }
-#endif //EMSCRIPTEN
+#endif //__EMSCRIPTEN__
 
 /// this draws the recording icon (play/pause/record)
 void FCEU_DrawRecordingStatus(uint8* XBuf)
 {
-#ifndef EMSCRIPTEN
+#ifndef __EMSCRIPTEN__
 	if(FCEUD_ShowStatusIcon())
 	{
 		bool hasPlayRecIcon = false;
@@ -420,7 +420,7 @@ void FCEU_DrawNumberRow(uint8 *XBuf, int *nstatus, int cur)
 	if(XBaf>=XBuf)
 		for(z=1;z<11;z++)
 		{
-#ifndef EMSCRIPTEN
+#ifndef __EMSCRIPTEN__
 			if(nstatus[z%10])
 			{
 				for(y=0;y<13;y++)

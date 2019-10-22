@@ -8,7 +8,7 @@ extern int newppu;
 void ResetGameLoaded(void);
 
 extern bool AutoResumePlay;
-#ifndef EMSCRIPTEN
+#ifndef __EMSCRIPTEN__
 extern char romNameWhenClosingEmulator[];
 #endif
 
@@ -57,7 +57,7 @@ extern int EmulationPaused;
 
 uint8 FCEU_ReadRomByte(uint32 i);
 
-#ifndef EMSCRIPTEN
+#ifndef __EMSCRIPTEN__
 extern readfunc ARead[0x10000];
 extern writefunc BWrite[0x10000];
 #else

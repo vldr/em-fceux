@@ -192,7 +192,7 @@ int Video_Init()
 	//FCEUI_SetShowFPS(1);
 #endif
 
-	emscripten_set_resize_callback(0, 0, 0, FCEM_ResizeCallback);
+	emscripten_set_resize_callback(EMSCRIPTEN_EVENT_TARGET_WINDOW, 0, 0, FCEM_ResizeCallback);
 
 	// Init both 2D and WebGL (3D) canvases and contexts.
 	FCEU_printf("Initializing canvas 2D context.\n");

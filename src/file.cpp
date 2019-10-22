@@ -53,7 +53,7 @@ using namespace std;
 
 bool bindSavestate = true;	//Toggle that determines if a savestate filename will include the movie filename
 static std::string BaseDirectory;
-#ifndef EMSCRIPTEN
+#ifndef __EMSCRIPTEN__
 static char FileExt[2048];	//Includes the . character, as in ".nes"
 static char FileBaseDirectory[2048];
 char FileBase[2048];
@@ -445,7 +445,7 @@ int FCEU_fisarchive(FCEUFILE *fp)
 
 std::string GetMfn() //Retrieves the movie filename from curMovieFilename (for adding to savestate and auto-save files)
 {
-#ifndef EMSCRIPTEN
+#ifndef __EMSCRIPTEN__
 	std::string movieFilenamePart;
 	extern char curMovieFilename[512];
 	if(*curMovieFilename)
@@ -477,7 +477,7 @@ void FCEUI_SetDirOverride(int which, char *n)
 	}
 }
 
-	#if !defined(HAVE_ASPRINTF) && !defined(EMSCRIPTEN)
+	#if !defined(HAVE_ASPRINTF) && !defined(__EMSCRIPTEN__)
 	static int asprintf(char **strp, const char *fmt, ...)
 	{
 		va_list ap;
@@ -706,7 +706,7 @@ std::string FCEU_MakeFName(int type, int id1, const char *cd1)
 					sprintf(ret,"%s" PSS "sav" PSS "%s.%s",BaseDirectory.c_str(),FileBase,cd1);
 			}
 			break;
-#ifndef EMSCRIPTEN
+#ifndef __EMSCRIPTEN__
 		case FCEUMKF_AUTOSTATE:
 			mfnString = GetMfn();
 			if (mfnString.length() <= MAX_MOVIEFILENAME_LEN)

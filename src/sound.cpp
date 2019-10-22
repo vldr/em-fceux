@@ -33,7 +33,7 @@
 #include <cstdio>
 #include <cstring>
 
-#ifndef EMSCRIPTEN
+#ifndef __EMSCRIPTEN__
 static uint32 wlookup1[32];
 static uint32 wlookup2[203];
 

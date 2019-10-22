@@ -750,7 +750,7 @@ namespace UtfConverter
 //convert a std::string to std::wstring
 std::wstring mbstowcs(std::string str) // UTF8->UTF32
 {
-#ifdef EMSCRIPTEN
+#ifdef __EMSCRIPTEN__
 	return UtfConverter::FromUtf8(str);
 #else
 	try {

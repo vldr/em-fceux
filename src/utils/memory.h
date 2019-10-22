@@ -35,7 +35,7 @@ void FCEU_memmove(void *d, void *s, uint32 l);
 void *FCEU_dmalloc(uint32 size);
 void FCEU_dfree(void *ptr);
 
-#ifndef EMSCRIPTEN
+#ifndef __EMSCRIPTEN__
 #define FCEU_ARRAY_EM(ptr_, type_, num_)
 #else
 #define FCEU_ARRAY_EM(ptr_, type_, num_) do { \

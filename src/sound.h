@@ -51,7 +51,7 @@ void SetSoundVariables(void);
 
 int GetSoundBuffer(int32 **W);
 int FlushEmulateSound(void);
-#ifndef EMSCRIPTEN
+#ifndef __EMSCRIPTEN__
 extern int32 Wave[WAVE_NUM];
 extern int32 WaveFinal[WAVE_NUM];
 extern int32 WaveHi[WAVEHI_NUM];

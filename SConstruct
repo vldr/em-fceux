@@ -212,7 +212,10 @@ else:
       env['LOGO'] = 0
       print 'Did not find libgd, you won\'t be able to create a logo screen for your avis.'
 
-  if env['OPENGL'] and (env['EMSCRIPTEN'] or conf.CheckLibWithHeader('GL', 'GL/gl.h', 'c', autoadd=1)):
+  if env['EMSCRIPTEN']:
+    conf.env.Append(CCFLAGS = "-DOPENGL")
+    env.Append(LIBS = ["GL", "idbfs.js"])
+  elif env['OPENGL'] and conf.CheckLibWithHeader('GL', 'GL/gl.h', 'c', autoadd=1):
     conf.env.Append(CCFLAGS = "-DOPENGL")
   conf.env.Append(CPPDEFINES = ['PSS_STYLE=1'])
 
@@ -228,26 +231,23 @@ print "base CPPDEFINES:",env['CPPDEFINES']
 print "base CCFLAGS:",env['CCFLAGS']
 
 if env['DEBUG']:
-  env.Append(CPPDEFINES=["_DEBUG"], CCFLAGS = ['-g', '-O0'])
   if env['EMSCRIPTEN']:
     common = ''
-    common += ' -s ASSERTIONS=2 -s SAFE_HEAP=1 -s ALIASING_FUNCTION_POINTERS=0'
+    common += ' -s STRICT=1'
+    common += ' -O0 -g'
+    common += ' -s ASSERTIONS=2 -s SAFE_HEAP=1'
     common += ' -s DEMANGLE_SUPPORT=1'
-    common += ' -s OUTLINING_LIMIT=25000'
-    env.Append(CCFLAGS = common, LINKFLAGS = common)
-    
+    env.Append(CPPDEFINES=["_DEBUG"], CCFLAGS = common, LINKFLAGS = common)
+  else:
+    env.Append(CPPDEFINES=["_DEBUG"], CCFLAGS = ['-g', '-O0'])
 
 if env['RELEASE']:
   if env['EMSCRIPTEN']:
     common = ''
+    common += ' -s STRICT=1'
+    common += ' -O3 --llvm-lto 3'
     common += ' -fno-exceptions -fno-rtti'
-    common += ' -flto -Oz'
-    common += ' --llvm-opts 3'
-    common += ' --llvm-lto 3'
-    common += ' -s WASM=1'
-    common += ' -s NO_EXIT_RUNTIME=1'
     common += ' -s AGGRESSIVE_VARIABLE_ELIMINATION=1'
-    common += ' -s DISABLE_EXCEPTION_CATCHING=1'
     common += ' -s ASSERTIONS=0'
     env.Append(CCFLAGS = common)
     env.Append(LINKFLAGS = common)

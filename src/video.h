@@ -8,7 +8,7 @@ void ResetScreenshotsCounter();
 uint32 GetScreenPixel(int x, int y, bool usebackup);
 int GetScreenPixelPalette(int x, int y, bool usebackup);
 extern uint8 *XBuf;
-#ifndef EMSCRIPTEN
+#ifndef __EMSCRIPTEN__
 extern uint8 *XBackBuf;
 #endif
 extern int ClipSidesOffset;

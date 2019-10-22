@@ -911,7 +911,7 @@ int iNESLoad(const char *name, FCEUFILE *fp, int OverwriteVidMode) {
 	return 1;
 }
 
-#ifndef EMSCRIPTEN
+#ifndef __EMSCRIPTEN__
 // bbit edited: the whole function below was added
 int iNesSave() {
 	FILE *fp;

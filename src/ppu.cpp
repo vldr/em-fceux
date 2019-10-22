@@ -329,7 +329,7 @@ uint8 PPUCHRRAM = 0;
 //Color deemphasis emulation.  Joy...
 static uint8 deemp = 0;
 static int deempcnt[8];
-#ifdef EMSCRIPTEN
+#ifdef __EMSCRIPTEN__
 uint8 deempScan[240];
 #endif
 
@@ -350,7 +350,7 @@ static uint32 scanlines_per_frame;
 
 uint8 PPU[4];
 uint8 PPUSPL;
-#ifdef EMSCRIPTEN
+#ifdef __EMSCRIPTEN__
 uint8 NTARAM[0x800], PALRAM[0x20], SPRAM[0x100];
 uint32 SPRBUF[0x100 / 4];
 #else
@@ -1227,7 +1227,7 @@ static void DoLine(void) {
 	int x;
 	uint8 *target = XBuf + (scanline << 8);
 
-#ifdef EMSCRIPTEN
+#ifdef __EMSCRIPTEN__
 	// Store the deemphasis bits per scanline.
 	if (scanline < 240) {
 		deempScan[scanline] = PPU[1] & 0xE0;
@@ -1259,7 +1259,7 @@ static void DoLine(void) {
 				*(uint32*)&target[x << 2] = (*(uint32*)&target[x << 2]) & 0x30303030;
 		}
 	}
-#ifndef EMSCRIPTEN
+#ifndef __EMSCRIPTEN__
 	if ((PPU[1] >> 5) == 0x7) {
 		for (x = 63; x >= 0; x--)
 			*(uint32*)&target[x << 2] = ((*(uint32*)&target[x << 2]) & 0x3f3f3f3f) | 0xc0c0c0c0;
@@ -1386,7 +1386,7 @@ static void FetchSpriteData(void) {
 					dst.x = spr->x;
 					dst.atr = spr->atr;
 
-#ifdef EMSCRIPTEN
+#ifdef __EMSCRIPTEN__
 					SPRBUF[ns] = *(uint32*)&dst;
 #else
 					*(uint32*)&SPRBUF[ns << 2] = *(uint32*)&dst;
@@ -1446,7 +1446,7 @@ static void FetchSpriteData(void) {
 					dst.x = spr->x;
 					dst.atr = spr->atr;
 
-#ifdef EMSCRIPTEN
+#ifdef __EMSCRIPTEN__
 					SPRBUF[ns] = *(uint32*)&dst;
 #else
 					*(uint32*)&SPRBUF[ns << 2] = *(uint32*)&dst;
@@ -1479,7 +1479,7 @@ static void RefreshSprites(void) {
 	spork = 0;
 	if (!numsprites) return;
 
-#ifdef EMSCRIPTEN
+#ifdef __EMSCRIPTEN__
 	for (int i = 256-1; i >= 0; --i) {
 		sprlinebuf[i] = 0x80;
 	}
@@ -1603,7 +1603,7 @@ static void CopySprites(uint8 *target) {
 
 	if (!rendersprites) return;	//User asked to not display sprites.
 
-#ifdef EMSCRIPTEN
+#ifdef __EMSCRIPTEN__
 	do {
 		uint8 t0 = sprlinebuf[n];
 		uint8 t1 = sprlinebuf[n+1];

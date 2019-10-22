@@ -57,7 +57,7 @@
 #include <zlib.h>
 
 uint8 *XBuf=NULL;
-#ifndef EMSCRIPTEN
+#ifndef __EMSCRIPTEN__
 uint8 *XBackBuf=NULL;
 #endif
 int ClipSidesOffset=0;	//Used to move displayed messages when Clips left and right sides is checked
@@ -68,7 +68,7 @@ GUIMESSAGE subtitleMessage;
 
 //for input display
 extern int input_display;
-#ifndef EMSCRIPTEN
+#ifndef __EMSCRIPTEN__
 extern uint32 cur_input_display;
 #else
 #define cur_input_display 0
@@ -115,7 +115,7 @@ int FCEU_InitVirtualVideo(void)
 		/* 256 bytes per scanline, * 240 scanline maximum, +16 for alignment,
 		*/
 
-#ifndef EMSCRIPTEN
+#ifndef __EMSCRIPTEN__
 		if(!(XBuf= (uint8*) (FCEU_malloc(256 * 256 + 16))) ||
 			!(XBackBuf= (uint8*) (FCEU_malloc(256 * 256 + 16))))
 #else
@@ -134,7 +134,7 @@ int FCEU_InitVirtualVideo(void)
 			XBuf+=m;
 		}
 
-#ifndef EMSCRIPTEN
+#ifndef __EMSCRIPTEN__
 		memset(XBuf,128,256*256); //*240);
 		memset(XBackBuf,128,256*256);
 #else
@@ -169,7 +169,7 @@ void FCEUI_SaveSnapshotAs(void)
 	dosnapsave=2;
 }
 
-#ifndef EMSCRIPTEN
+#ifndef __EMSCRIPTEN__
 static void ReallySnap(void)
 {
 	int x=SaveSnapshot();
@@ -182,7 +182,7 @@ static void ReallySnap(void)
 
 void FCEU_PutImage(void)
 {
-#ifndef EMSCRIPTEN
+#ifndef __EMSCRIPTEN__
 	if(dosnapsave==2)	//Save screenshot as, currently only flagged & run by the Win32 build. //TODO SDL: implement this?
 	{
 		char nameo[512];
@@ -200,19 +200,19 @@ void FCEU_PutImage(void)
 	{
 		DrawNSF(XBuf);
 
-#ifndef EMSCRIPTEN
+#ifndef __EMSCRIPTEN__
 		//Save snapshot after NSF screen is drawn.  Why would we want to do it before?
 		if(dosnapsave==1)
 		{
 			ReallySnap();
 			dosnapsave=0;
 		}
-#endif //EMSCRIPTEN
+#endif //__EMSCRIPTEN__
 	}
 	else
 	{
 
-#ifndef EMSCRIPTEN
+#ifndef __EMSCRIPTEN__
 		//Save backbuffer before overlay stuff is written.
 		if(!FCEUI_EmulationPaused())
 			memcpy(XBackBuf, XBuf, 256*256);
@@ -233,7 +233,7 @@ void FCEU_PutImage(void)
 		}
 
 		if (!FCEUI_AviEnableHUDrecording()) snapAVI();
-#endif //EMSCRIPTEN
+#endif //__EMSCRIPTEN__
 
 		if(GameInfo->type==GIT_VSUNI)
 			FCEU_VSUniDraw(XBuf);
@@ -249,7 +249,7 @@ void FCEU_PutImage(void)
 	if(FCEUD_ShouldDrawInputAids())
 		FCEU_DrawInput(XBuf);
 
-#ifndef EMSCRIPTEN
+#ifndef __EMSCRIPTEN__
 	//Fancy input display code
 	if(input_display)
 	{
@@ -443,7 +443,7 @@ void FCEU_PutImage(void)
 	} else DrawMessage(false);
 #else
 	DrawMessage(false);
-#endif //EMSCRIPTEN
+#endif //__EMSCRIPTEN__
 }
 void snapAVI()
 {
@@ -550,7 +550,7 @@ uint32 GetScreenPixel(int x, int y, bool usebackup) {
 	if (((x < 0) || (x > 255)) || ((y < 0) || (y > 255)))
 		return -1;
 
-#ifndef EMSCRIPTEN
+#ifndef __EMSCRIPTEN__
 	if (usebackup)
 		FCEUD_GetPalette(XBackBuf[(y*256)+x],&r,&g,&b);
 	else
@@ -566,7 +566,7 @@ int GetScreenPixelPalette(int x, int y, bool usebackup) {
 	if (((x < 0) || (x > 255)) || ((y < 0) || (y > 255)))
 		return -1;
 
-#ifndef EMSCRIPTEN
+#ifndef __EMSCRIPTEN__
 	if (usebackup)
 		return XBackBuf[(y*256)+x] & 0x3f;
 	else
@@ -793,7 +793,7 @@ void FCEUI_ToggleShowFPS()
 static uint64 boop[60];
 static int boopcount = 0;
 
-#ifndef EMSCRIPTEN
+#ifndef __EMSCRIPTEN__
 #define COLOR_FPS 0xA0
 #else
 #define COLOR_FPS 0x20

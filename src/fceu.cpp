@@ -73,7 +73,7 @@ extern void RefreshThrottleFPS();
 #include "drivers/win/ramwatch.h"
 #include "drivers/win/memwatch.h"
 #include "drivers/win/tracer.h"
-#elif EMSCRIPTEN
+#elif __EMSCRIPTEN__
 #include "drivers/em/em.h"
 #else
 #include "drivers/sdl/sdl.h"
@@ -99,7 +99,7 @@ bool AutoSS = false;        //Flagged true when the first auto-savestate is made
 bool movieSubtitles = true; //Toggle for displaying movie subtitles
 bool DebuggerWasUpdated = false; //To prevent the debugger from updating things without being updated.
 bool AutoResumePlay = false;
-#ifndef EMSCRIPTEN
+#ifndef __EMSCRIPTEN__
 char romNameWhenClosingEmulator[2048] = {0};
 #endif
 
@@ -188,7 +188,7 @@ static void FCEU_CloseGame(void)
 		//clear screen when game is closed
 		extern uint8 *XBuf;
 		if (XBuf)
-#ifndef EMSCRIPTEN
+#ifndef __EMSCRIPTEN__
 			memset(XBuf, 0, 256 * 256);
 #else
 			memset(XBuf, 0x1D1D1D1D, 256 * 256);
@@ -199,12 +199,12 @@ static void FCEU_CloseGame(void)
 		delete GameInfo;
 		GameInfo = NULL;
 
-#ifndef EMSCRIPTEN
+#ifndef __EMSCRIPTEN__
 		currFrameCounter = 0;
 #endif
 
 		//Reset flags for Undo/Redo/Auto Savestating //adelikat: TODO: maybe this stuff would be cleaner as a struct or class
-#ifndef EMSCRIPTEN
+#ifndef __EMSCRIPTEN__
 		lastSavestateMade[0] = 0;
 #else
 		if (lastSavestateMade) {
@@ -213,7 +213,7 @@ static void FCEU_CloseGame(void)
 #endif
 		undoSS = false;
 		redoSS = false;
-#ifndef EMSCRIPTEN
+#ifndef __EMSCRIPTEN__
 		lastLoadstateMade[0] = 0;
 #else
 		if (lastLoadstateMade) {
@@ -235,7 +235,7 @@ FCEUGI *GameInfo = NULL;
 void (*GameInterface)(GI h);
 void (*GameStateRestore)(int version);
 
-#ifndef EMSCRIPTEN
+#ifndef __EMSCRIPTEN__
 readfunc ARead[0x10000];
 writefunc BWrite[0x10000];
 #else
@@ -692,7 +692,7 @@ void FCEUI_Emulate(uint8 **pXBuf, int32 **SoundBuf, int32 *SoundBufSize, int ski
 		if (EmulationPaused & EMULATIONPAUSED_PAUSED)
 		{
 			// emulator is paused
-#ifndef EMSCRIPTEN
+#ifndef __EMSCRIPTEN__
 			memcpy(XBuf, XBackBuf, 256*256);
 			FCEU_PutImage();
 #endif
@@ -787,7 +787,7 @@ void ResetNES(void) {
 	FCEUPPU_Reset();
 	X6502_Reset();
 
-#ifndef EMSCRIPTEN
+#ifndef __EMSCRIPTEN__
 	// clear back baffer
 	extern uint8 *XBackBuf;
 	memset(XBackBuf, 0, 256 * 256);
@@ -868,7 +868,7 @@ void PowerNES(void) {
 	FCEU_PowerCheats();
 	LagCounterReset();
 
-#ifndef EMSCRIPTEN
+#ifndef __EMSCRIPTEN__
 	// clear back buffer
 	extern uint8 *XBackBuf;
 	memset(XBackBuf, 0, 256 * 256);

@@ -41,7 +41,7 @@
 #ifdef _S9XLUA_H
 #include "fceulua.h"
 #endif
-#ifdef EMSCRIPTEN
+#ifdef __EMSCRIPTEN__
 #include <emscripten.h>
 #endif
 
@@ -72,7 +72,7 @@ static int StateShow;
 //tells the save system innards that we're loading the old format
 bool FCEU_state_loading_old_format;
 
-#ifndef EMSCRIPTEN
+#ifndef __EMSCRIPTEN__
 char lastSavestateMade[2048]; //Stores the filename of the last savestate made (needed for UndoSavestate)
 #else
 char *lastSavestateMade = 0;
@@ -80,7 +80,7 @@ char *lastSavestateMade = 0;
 bool undoSS = false;		  //This will be true if there is lastSavestateMade, it was made since ROM was loaded, a backup state for lastSavestateMade exists
 bool redoSS = false;		  //This will be true if UndoSaveState is run, will turn false when a new savestate is made
 
-#ifndef EMSCRIPTEN
+#ifndef __EMSCRIPTEN__
 char lastLoadstateMade[2048]; //Stores the filename of the last state loaded (needed for Undo/Redo loadstate)
 #else
 char *lastLoadstateMade = 0;
@@ -90,7 +90,7 @@ bool redoLS = false;		  //This will be true if a backupstate was loaded, meaning
 
 bool internalSaveLoad = false;
 
-#ifndef EMSCRIPTEN
+#ifndef __EMSCRIPTEN__
 bool backupSavestates = true;
 #else
 bool backupSavestates = false;
@@ -320,7 +320,7 @@ static bool ReadStateChunks(EMUFILE* is, int32 totalsize)
 		case 8:
 			// load back buffer
 			{
-#ifndef EMSCRIPTEN
+#ifndef __EMSCRIPTEN__
 				extern uint8 *XBackBuf;
 #else
 				uint8 *XBackBuf = XBuf;
@@ -421,7 +421,7 @@ bool FCEUSS_SaveMS(EMUFILE* outstream, int compressionLevel)
 	}
 	// save back buffer
 	{
-#ifndef EMSCRIPTEN
+#ifndef __EMSCRIPTEN__
 		extern uint8 *XBackBuf;
 #else
 		uint8 *XBackBuf = XBuf;
@@ -470,7 +470,7 @@ bool FCEUSS_SaveMS(EMUFILE* outstream, int compressionLevel)
 	outstream->fwrite((char*)header,16);
 	outstream->fwrite((char*)cbuf,comprlen==-1?totalsize:comprlen);
 
-#ifdef EMSCRIPTEN
+#ifdef __EMSCRIPTEN__
 	EM_ASM({
 		FS.syncfs(FCEM.onSyncToIDB);
 	});
@@ -829,7 +829,7 @@ bool FCEUSS_Load(const char *fname, bool display_message)
 	Update_RAM_Search(); // Update_RAM_Watch() is also called.
 #endif
 
-#ifndef EMSCRIPTEN
+#ifndef __EMSCRIPTEN__
 		//Update input display if movie is loaded
 		extern uint32 cur_input_display;
 		extern uint8 FCEU_GetJoyJoy(void);
@@ -1009,7 +1009,7 @@ void FCEUI_LoadState(const char *fname, bool display_message)
 	}
 	if (FCEUSS_Load(fname, display_message))
 	{
-#ifndef EMSCRIPTEN
+#ifndef __EMSCRIPTEN__
 		//mbg todo netplay
 #if 0 
 		if(FCEUnetplay)
@@ -1036,7 +1036,7 @@ void FCEUI_LoadState(const char *fname, bool display_message)
 		}
 #endif
 		freshMovie = false;		//The movie has been altered so it is no longer fresh
-#endif // EMSCRIPTEN
+#endif // __EMSCRIPTEN__
 	} else
 	{
 		loadStateFailed = 1;
@@ -1083,7 +1083,7 @@ void SwapSaveState()
 	//Both files must exist
 	//--------------------------------------------------------------------------------------------
 
-#ifndef EMSCRIPTEN
+#ifndef __EMSCRIPTEN__
 	if (!lastSavestateMade)
 #else
 	if (!lastSavestateMade || !lastSavestateMade[0])
@@ -1192,7 +1192,7 @@ void LoadBackup()
 void RedoLoadState()
 {
 	if (!redoLS) return;
-#ifndef EMSCRIPTEN
+#ifndef __EMSCRIPTEN__
 	if (lastLoadstateMade && redoLS)
 #else
 	if (lastLoadstateMade && lastLoadstateMade[0] && redoLS)

@@ -613,7 +613,7 @@ static int ES2_CreateWebGLContext()
 	attr.enableExtensionsByDefault = 0;
 	attr.majorVersion = 1;
 	attr.minorVersion = 0;
-	EMSCRIPTEN_WEBGL_CONTEXT_HANDLE ctx = emscripten_webgl_create_context(0, &attr);
+	EMSCRIPTEN_WEBGL_CONTEXT_HANDLE ctx = emscripten_webgl_create_context("#canvas3D", &attr);
 	if (ctx > 0) {
 		emscripten_webgl_make_context_current(ctx);
 	}

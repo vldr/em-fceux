@@ -94,7 +94,7 @@ void convert_metadata(char* metadata, int metadata_size, uint8* tmp, int metadat
 
 //backwards compat
 // TODO: tsone: unused function, remove?
-#ifndef EMSCRIPTEN
+#ifndef __EMSCRIPTEN__
 static void FCEUI_LoadMovie_v1(char *fname, int _read_only);
 #endif
 //static int FCEUI_MovieGetInfo_v1(const char* fname, MOVIE_INFO* info);
@@ -543,7 +543,7 @@ EFCM_CONVERTRESULT convert_fcm(MovieData& md, std::string fname)
 	uint32 framecount;
 	uint32 rerecord_count;
 // TODO: tsone: two unused variables here, remove?
-#ifndef EMSCRIPTEN
+#ifndef __EMSCRIPTEN__
 	int movieConvertOffset1=0, movieConvertOffset2=0,movieSyncHackOn=0;
 #else
 	int movieSyncHackOn=0;

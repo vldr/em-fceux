@@ -1,7 +1,7 @@
 #ifndef DRAWING_H
 #define DRAWING_H
 
-#ifndef EMSCRIPTEN
+#ifndef __EMSCRIPTEN__
 void DrawTextLineBG(uint8 *dest);
 #endif
 void DrawMessage(bool beforeMovie);

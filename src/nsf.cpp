@@ -478,7 +478,7 @@ uint8 FCEU_GetJoyJoy(void);
 static int special=0;
 
 
-#ifndef EMSCRIPTEN
+#ifndef __EMSCRIPTEN__
 #define COLOR_BG	0
 #define COLOR_STROBE	3
 #define COLOR_TEXT	6

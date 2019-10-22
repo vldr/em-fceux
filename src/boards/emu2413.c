@@ -441,7 +441,7 @@ INLINE static void slotOn(OPLL_SLOT * slot) {
 }
 
 // TODO: tsone: unused, remove?
-#ifndef EMSCRIPTEN
+#ifndef __EMSCRIPTEN__
 /* Slot key on without reseting the phase */
 INLINE static void slotOn2(OPLL_SLOT * slot) {
 	slot->eg_mode = ATTACK;
@@ -485,7 +485,7 @@ INLINE static void setVolume(OPLL * opll, int32 c, int32 volume) {
 }
 
 // TODO: tsone: unused, remove?
-#ifndef EMSCRIPTEN
+#ifndef __EMSCRIPTEN__
 INLINE static void setSlotVolume(OPLL_SLOT * slot, int32 volume) {
 	slot->volume = volume;
 }

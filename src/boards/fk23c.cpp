@@ -87,7 +87,7 @@ static int prg_mask;
 static void BMCFK23CPW(uint32 A, uint8 V)
 {
 // TODO: tsone: unused variables, remove?
-#ifndef EMSCRIPTEN
+#ifndef __EMSCRIPTEN__
   uint32 bank = (EXPREGS[1] & 0x1F);
   uint32 hiblock = ((EXPREGS[0] & 8) << 4)|((EXPREGS[0] & 0x80) << 1)|(UNIFchrrama?((EXPREGS[2] & 0x40)<<3):0);
   uint32 block = (EXPREGS[1] & 0x60) | hiblock;

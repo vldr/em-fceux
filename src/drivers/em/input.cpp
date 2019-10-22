@@ -99,7 +99,7 @@ static bool IsInputOnce(unsigned int input)
 static void UpdateSystem()
 {
 // TODO: tsone: family keyboard toggle not working
-#ifndef EMSCRIPTEN
+#ifndef __EMSCRIPTEN__
 	// check if the family keyboard is enabled
 	if (CurInputType[2] == SIFC_FKB)
 	{
@@ -117,7 +117,7 @@ static void UpdateSystem()
 #endif
 
 // TODO: tsone: not yet implemented
-#ifndef EMSCRIPTEN
+#ifndef __EMSCRIPTEN__
 	if (_keyonly (Hotkeys[HK_TOGGLE_BG]))
 	{
 		if (is_shift)
@@ -132,7 +132,7 @@ static void UpdateSystem()
 #endif
 
 // TODO: tsone: not yet implemented
-#ifndef EMSCRIPTEN
+#ifndef __EMSCRIPTEN__
 		// Famicom disk-system games
 	if (GameInfo && GameInfo->type == GIT_FDS)
 	{
@@ -157,7 +157,7 @@ static void UpdateSystem()
 	}
 
 // TODO: tsone: not implemented
-#ifndef EMSCRIPTEN
+#ifndef __EMSCRIPTEN__
 	if (_keyonly (SDLK_EQUALS)) {
 		DecreaseEmulationSpeed ();
 	}
@@ -169,7 +169,7 @@ static void UpdateSystem()
 #endif
 
 // TODO: tsone: allow input displaying?
-#ifndef EMSCRIPTEN
+#ifndef __EMSCRIPTEN__
 	if (_keyonly (SDLK_COMMA))
 	{
 		FCEUI_ToggleInputDisplay ();
@@ -204,7 +204,7 @@ static void UpdateSystem()
 	}
 
 // TODO: tsone: power off by some key or UI?
-#ifndef EMSCRIPTEN
+#ifndef __EMSCRIPTEN__
 	//if(_keyonly(Hotkeys[HK_POWER])) {
 	//    FCEUI_PowerNES();
 	//}
@@ -222,7 +222,7 @@ static void UpdateSystem()
 	}
 
 // TODO: tsone: not implemented
-#ifndef EMSCRIPTEN
+#ifndef __EMSCRIPTEN__
 	if (_keyonly (SDLK_PAGEUP)) {
 		FCEUI_SelectStateNext (1);
 	}
@@ -377,7 +377,7 @@ static void UpdateGamepad(void)
 		}
 
 // TODO: tsone: keypad exit is not supported
-#ifndef EMSCRIPTEN
+#ifndef __EMSCRIPTEN__
 		int four_button_exit = 0;
 		// if a+b+start+select is pressed, exit
 		if (four_button_exit && JS == 15) {
@@ -545,9 +545,8 @@ void FCEUD_SetInput(bool fourscore, bool microphone, ESI, ESI, ESIFC fcexp)
 // TODO: tsone: support fourscore?
 //	FCEUI_SetInputFourscore((eoptions & EO_FOURSCORE) != 0);
 
-	const char *elem = "#window";
-	emscripten_set_keydown_callback(elem, 0, 0, KeyCallback);
-	emscripten_set_keyup_callback(elem, 0, 0, KeyCallback);
+	emscripten_set_keydown_callback(EMSCRIPTEN_EVENT_TARGET_WINDOW, 0, 0, KeyCallback);
+	emscripten_set_keyup_callback(EMSCRIPTEN_EVENT_TARGET_WINDOW, 0, 0, KeyCallback);
 }
 
 // NOTE: tsone: required for boards/transformer.cpp, must return array of 256 ints...

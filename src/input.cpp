@@ -91,7 +91,7 @@ static uint8 LastStrobe;
 
 bool replaceP2StartWithMicrophone = false;
 
-#ifdef EMSCRIPTEN
+#ifdef __EMSCRIPTEN__
 static int currFrameCounter = 0;
 #endif
 
@@ -341,7 +341,7 @@ void FCEU_UpdateInput(void)
 		portFC.driver->Update(portFC.ptr,portFC.attrib);
 	}
 
-	if(GameInfo->type==GIT_VSUNI)
+	if(GameInfo && GameInfo->type==GIT_VSUNI)
 		if(coinon) coinon--;
 
 	if(FCEUnetplay)
@@ -350,7 +350,7 @@ void FCEU_UpdateInput(void)
 	FCEUMOV_AddInputState();
 
 	//TODO - should this apply to the movie data? should this be displayed in the input hud?
-	if(GameInfo->type==GIT_VSUNI){
+	if(GameInfo && GameInfo->type==GIT_VSUNI){
 		FCEU_VSUniSwap(&joy[0],&joy[1]);
     }
 }
@@ -396,7 +396,7 @@ static void SetInputStuff(int port)
 	switch(joyports[port].type)
 	{
 	case SI_GAMEPAD:
-		if(GameInfo->type==GIT_VSUNI){
+		if(GameInfo && GameInfo->type==GIT_VSUNI){
 			joyports[port].driver = &GPCVS;
         } else {
 			joyports[port].driver= &GPC;
@@ -498,7 +498,7 @@ void InitializeInput(void)
 	memset(joy,0,sizeof(joy));
 	LastStrobe = 0;
 
-	if(GameInfo->type==GIT_VSUNI)
+	if(GameInfo && GameInfo->type==GIT_VSUNI)
 	{
 		SetReadHandler(0x4016,0x4016,VSUNIRead0);
 		SetReadHandler(0x4017,0x4017,VSUNIRead1);
@@ -609,7 +609,7 @@ void FCEUI_VSUniCoin(void)
 //Resets the frame counter if movie inactive and rom is reset or power-cycle
 void ResetFrameCounter()
 {
-#ifndef EMSCRIPTEN
+#ifndef __EMSCRIPTEN__
 extern EMOVIEMODE movieMode;
 #endif
 	if(movieMode == MOVIEMODE_INACTIVE)
@@ -653,7 +653,7 @@ const char* FCEUI_CommandTypeNames[]=
 };
 
 // TODO: tsone: unused function, remove?
-#ifndef EMSCRIPTEN
+#ifndef __EMSCRIPTEN__
 static void CommandUnImpl(void);
 #endif
 static void CommandToggleDip(void);
@@ -750,7 +750,7 @@ struct EMUCMDTABLE FCEUI_CommandTable[]=
 	{ EMUCMD_LOAD_STATE_SLOT_8,				EMUCMDTYPE_STATE,	CommandStateLoad, 0, 0, "Load State from Slot 8", EMUCMDFLAG_TASEDITOR },
 	{ EMUCMD_LOAD_STATE_SLOT_9,				EMUCMDTYPE_STATE,	CommandStateLoad, 0, 0, "Load State from Slot 9", EMUCMDFLAG_TASEDITOR },
 
-#ifndef EMSCRIPTEN
+#ifndef __EMSCRIPTEN__
 	{ EMUCMD_MOVIE_RECORD_TO,				EMUCMDTYPE_MOVIE,	FCEUD_MovieRecordTo, 0, 0, "Record Movie To...", 0 },
 	{ EMUCMD_MOVIE_REPLAY_FROM,				EMUCMDTYPE_MOVIE,	FCEUD_MovieReplayFrom, 0, 0, "Play Movie From...", 0 },
 	{ EMUCMD_MOVIE_PLAY_FROM_BEGINNING,		EMUCMDTYPE_MOVIE,	FCEUI_MoviePlayFromBeginning, 0, 0, "Play Movie From Beginning", EMUCMDFLAG_TASEDITOR },
@@ -771,7 +771,7 @@ struct EMUCMDTABLE FCEUI_CommandTable[]=
 	{ EMUCMD_SOUND_VOLUME_DOWN,				EMUCMDTYPE_SOUND,	CommandSoundAdjust, 0, 0, "Sound Volume Down", EMUCMDFLAG_TASEDITOR },
 	{ EMUCMD_SOUND_VOLUME_NORMAL,			EMUCMDTYPE_SOUND,	CommandSoundAdjust, 0, 0, "Sound Volume Normal", EMUCMDFLAG_TASEDITOR },
 
-#ifndef EMSCRIPTEN
+#ifndef __EMSCRIPTEN__
 	{ EMUCMD_AVI_RECORD_AS,					EMUCMDTYPE_AVI,		FCEUD_AviRecordTo, 0, 0, "Record AVI As...", EMUCMDFLAG_TASEDITOR },
 	{ EMUCMD_AVI_STOP,						EMUCMDTYPE_AVI,		FCEUD_AviStop, 0, 0, "Stop AVI", EMUCMDFLAG_TASEDITOR },
 #endif
@@ -862,7 +862,7 @@ void FCEUI_HandleEmuCommands(TestCommandState* testfn)
 }
 
 // TODO: tsone: unused func, remove?
-#ifndef EMSCRIPTEN
+#ifndef __EMSCRIPTEN__
 static void CommandUnImpl(void)
 {
 	FCEU_DispMessage("command '%s' unimplemented.",0, FCEUI_CommandTable[i].name);
@@ -871,7 +871,7 @@ static void CommandUnImpl(void)
 
 static void CommandToggleDip(void)
 {
-	if (GameInfo->type==GIT_VSUNI)
+	if (GameInfo && GameInfo->type==GIT_VSUNI)
 		FCEUI_VSUniToggleDIP(execcmd-EMUCMD_VSUNI_TOGGLE_DIP_0);
 }
 
@@ -1192,7 +1192,7 @@ static void UndoRedoSavestate(void)
 	// FIXME this will always evaluate to true, should this be
 	// if (*lastSavestateMade...) to check if it holds a string or just
 	// a '\0'?
-#ifndef EMSCRIPTEN
+#ifndef __EMSCRIPTEN__
 	if (lastSavestateMade && (undoSS || redoSS))
 #else
 	if (lastSavestateMade && lastSavestateMade[0] && (undoSS || redoSS))

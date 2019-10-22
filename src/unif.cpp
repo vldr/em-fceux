@@ -108,7 +108,7 @@ static void ResetUNIF(void) {
 	UNIFchrrama = 0;
 }
 
-#ifndef EMSCRIPTEN
+#ifndef __EMSCRIPTEN__
 static uint8 exntar[2048];
 #else
 static uint8* exntar = 0;

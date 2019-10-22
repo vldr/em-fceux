@@ -92,7 +92,7 @@ static INLINE void setpageptr(int s, uint32 A, uint8 *p, int ram) {
 		}
 }
 
-#ifndef EMSCRIPTEN
+#ifndef __EMSCRIPTEN__
 static uint8 nothing[8192];
 #else
 static uint8* nothing = 0;

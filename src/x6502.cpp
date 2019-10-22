@@ -353,7 +353,7 @@ static uint8 CycTable[256] =
 /*0xF0*/ 2,5,2,8,4,4,6,6,2,4,2,7,4,4,7,7,
 };
 
-#ifdef EMSCRIPTEN
+#ifdef __EMSCRIPTEN__
 #include "utils/memory.h"
 // Function table includes.
 #include "opsfunc.inc"
@@ -391,7 +391,7 @@ void X6502_Init(void)
 {
 	unsigned int i;
 
-#ifdef EMSCRIPTEN
+#ifdef __EMSCRIPTEN__
 	// Initialize function table.
 	opsinit();
 #endif
@@ -510,7 +510,7 @@ extern int test; test++;
    CallRegisteredLuaMemHook(_PC, 1, 0, LUAMEMHOOK_EXEC);
    #endif
    _PC++;
-#ifndef EMSCRIPTEN
+#ifndef __EMSCRIPTEN__
    switch(b1)
    {
     #include "ops.inc"
