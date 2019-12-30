@@ -82,6 +82,7 @@ toggleSound : (function() {
       } else if (typeof webkitAudioContext !== 'undefined') {
         FCEM.audioContext = new webkitAudioContext();
       }
+      FCEM.audioContext.resume();
     }
 
     Module.romName = path;
