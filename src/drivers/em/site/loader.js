@@ -75,6 +75,15 @@ toggleSound : (function() {
     FCEM.showControls(false);
   },
   startGame : function(path) {
+    // NOTE: tsone: AudioContext must be created from user input
+    if (typeof FCEM.audioContext === 'undefined') {
+      if (typeof AudioContext !== 'undefined') {
+        FCEM.audioContext = new AudioContext();
+      } else if (typeof webkitAudioContext !== 'undefined') {
+        FCEM.audioContext = new webkitAudioContext();
+      }
+    }
+
     Module.romName = path;
     Module.romReload = 1;
   },

@@ -152,34 +152,16 @@ void Sound_Silence(int option)
 	s_silenced = option;
 }
 
-int Sound_IsInitialized()
+static void AudioSetSampleRate(int sampleRate)
 {
-	return s_initialized;
-}
-
-static int AudioContextCreate()
-{
-	return EM_ASM_INT_V({
-		if (!FCEM.audioContext) {
-				if (typeof(AudioContext) !== 'undefined') {
-					FCEM.audioContext = new AudioContext();
-				} else if (typeof(webkitAudioContext) !== 'undefined') {
-					FCEM.audioContext = new webkitAudioContext();
-				} else {
-					return 0;
-				}
-		}
-		return 1;
-	});
+	em_sound_rate = sampleRate;
+	em_sound_frame_samples = em_sound_rate / NTSC_FPS;
+	FCEUI_Sound(em_sound_rate);
 }
 
 // Returns the sampleRate (Hz) of initialized audio context.
 static int AudioContextInit()
 {
-	if (!AudioContextCreate()) {
-		return 0;
-	}
-
 	EM_ASM_ARGS({
 		// Always mono (1 channel).
 		FCEM.scriptProcessorNode = FCEM.audioContext.createScriptProcessor($0, 0, 1);
@@ -190,52 +172,54 @@ static int AudioContextInit()
 		FCEM.scriptProcessorNode.connect(FCEM.audioContext.destination);
 	}, SOUND_HW_BUF_MAX, AudioCallback);
 
-	return EM_ASM_INT_V({
+	int sampleRate = EM_ASM_INT_V({
 		return FCEM.audioContext.sampleRate;
 	});
+	AudioSetSampleRate(sampleRate);
+	return sampleRate;
 }
 
-
-int Sound_Init()
+int Sound_IsInitialized()
 {
-	int sampleRate;
-
-	if (Sound_IsInitialized()) {
+	if (s_initialized) {
 		return 1;
 	}
 
-	printf("Initializing Web Audio.\n");
+	if (EM_ASM_INT_V({
+		return typeof FCEM.audioContext === 'undefined';
+	})) {
+		return 0;
+	}
+
+	s_initialized = AudioContextInit();
+	if (s_initialized) {
+		printf("Web Audio context initialized.\n");
+	}
+	return s_initialized;
+}
+
+int Sound_Init()
+{
+	if (s_Buffer) {
+		return 1;
+	}
 
 	s_Buffer = (buf_t*) FCEU_dmalloc(sizeof(buf_t) * SOUND_BUF_MAX);
 	if (!s_Buffer) {
-		goto error;
+		FCEUD_PrintError("Failed to create audio buffer.");
+		return 0;
 	}
 	s_BufferRead = s_BufferWrite = s_BufferCount = 0;
 
-	sampleRate = AudioContextInit();
-	if (!sampleRate) {
-		FCEU_dfree(s_Buffer);
-		s_Buffer = 0;
-		goto error;
-	}
-	em_sound_rate = sampleRate;
-	em_sound_frame_samples = em_sound_rate / NTSC_FPS;
-
 	FCEUI_SetSoundVolume(150);
 	FCEUI_SetSoundQuality(SOUND_QUALITY);
-	FCEUI_Sound(em_sound_rate);
+	AudioSetSampleRate(44100);
 	FCEUI_SetTriangleVolume(256);
 	FCEUI_SetSquare1Volume(256);
 	FCEUI_SetSquare2Volume(256);
 	FCEUI_SetNoiseVolume(256);
 	FCEUI_SetPCMVolume(256);
-
-	s_initialized = 1;
 	return 1;
-
-error:
-	FCEUD_PrintError("Failed to initialize Web Audio.");
-	return 0;
 }
 
 int Sound_GetBufferCount(void)
