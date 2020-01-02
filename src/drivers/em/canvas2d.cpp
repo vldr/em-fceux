@@ -87,7 +87,7 @@ static void ConvertNTSCScan2(uint32 *dst, const uint8 *row_pixels, int deemp,
 	const double f0 = 1.0 + 2.0*sharpness;
 
 #define LK_N 8 // must be power of two and >= NUM_TAPS+2*2
-	int lk[LK_N];
+	int lk[LK_N] = {};
 	int lk_top = 0;
 #define RGB_NUM 8
 	double rgb[RGB_NUM][2*3];
