@@ -1,5 +1,6 @@
 {
     "files.exclude": {
-        "**/*.o": true
+        "**/*.o": true,
+        "src/drivers/em/**/fceux.{js,wasm,wasm.map,wast,data}": true
     }
 }

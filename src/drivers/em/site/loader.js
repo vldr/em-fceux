@@ -433,7 +433,7 @@ var Module = {
     // The handlers forces the canvas size by setting css style width and height with
     // "!important" flag. Workaround is to disable the default fullscreen handlers.
     // See Emscripten's updateCanvasDimensions() in library_browser.js for the faulty code.
-    Browser.fullScreenHandlersInstalled = true;
+    Browser.fullscreenHandlersInstalled = true;
     // Initial IDBFS sync.
     FS.syncfs(true, FCEM.onInitialSyncFromIDB);
     // Setup configuration from localStorage.
