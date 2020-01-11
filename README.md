@@ -60,7 +60,7 @@ Notable *unsupported* FCEUX features:
 
 em-fceux can be built under Linux or Unix. Windows is not currently supported.
 
-First install emsdk to $HOME/emsdk/ and emscripten (tested to work with 1.37.28).
+First install emsdk to $HOME/emsdk/ and emscripten 1.39.4 (upstream).
 Follow instructions in: http://emscripten.org/
 
 Then you also need scons build tool, gzip and Python 2.7.x. Their installation
