@@ -131,7 +131,7 @@ enum FCEM_Controller {
 // The rate of output and emulated (internal) audio (frequency, in Hz).
 extern int em_sound_rate;
 // Number of audio samples per frame.
-extern int em_sound_frame_samples;
+extern double em_sound_frame_samples;
 // Number of scanlines to show in current video mode: NTSC -> 224, PAL -> 240.
 extern int em_scanlines;
 extern bool em_no_waiting;

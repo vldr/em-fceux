@@ -32,7 +32,7 @@ typedef float mix_t;
 extern int EmulationPaused; // defined in fceu.cpp
 
 int em_sound_rate = SOUND_RATE;
-int em_sound_frame_samples = SOUND_RATE / NTSC_FPS;
+double em_sound_frame_samples = SOUND_RATE / NTSC_FPS;
 
 static buf_t *s_Buffer = 0;
 static int s_BufferRead = 0;
