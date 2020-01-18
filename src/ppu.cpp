@@ -69,8 +69,6 @@ static uint32 ppulut1[256];
 static uint32 ppulut2[256];
 static uint32 ppulut3[128];
 
-int test = 0;
-
 template<typename T, int BITS>
 struct BITREVLUT {
 	T* lut;

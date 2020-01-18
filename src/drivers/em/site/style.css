@@ -113,15 +113,6 @@ img.preload {
   height: 1px;
 }
 
-#loader {
-  position: absolute;
-  left: 0;
-  top: 0;
-  width: 100%;
-  height: 100%;
-  background: #0A0A0A;
-  z-index: 255;
-}
 #noscript {
   font-family: Arial,Helvetica,sans-serif;
   font-weight: bold;
@@ -133,21 +124,6 @@ img.preload {
   width: 280px;
   height: 100px;
   text-align: center;
-}
-#progressDiv {
-  display: none;
-  position: absolute;
-  border: solid 3px #FCFCFC;
-  top: 50%;
-  left: 50%;
-  margin: -31px 0 0 -63px;
-  width: 126px;
-  height: 21px;
-}
-#progress {
-  width: 0px;
-  height: 21px;
-  background: #FCFCFC;
 }
 
 #fullscreenIcon, #soundIcon, #dpadIcon, #helpIcon,

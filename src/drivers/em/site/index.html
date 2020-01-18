@@ -56,19 +56,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 <canvas class="emscripten" id="canvas" oncontextmenu="event.preventDefault()"></canvas>
 <canvas class="emscripten" id="canvas3D" oncontextmenu="event.preventDefault()"></canvas>
 
-<div id="loader">
-  <noscript id="noscript">
-     PLEASE ENABLE JAVASCRIPT em-fceux requires JavaScript
-  </noscript>
-  <script>
-    if (typeof WebAssembly !== "object")
-      window.location += "../em-fceux-asmjs/";
-  </script>
-  <div id="progressDiv"><div id="progress"></div></div>
-  <script>
-    document.getElementById('progressDiv').style.display = 'block';
-  </script>
-</div>
+<noscript id="noscript">
+  PLEASE ENABLE JAVASCRIPT em-fceux requires JavaScript
+</noscript>
 
 <input id="controllersToggle" type="checkbox" hidden />
 <div id="controllersTab">
@@ -216,5 +206,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 <script src="{{config.js}}"></script>
 <script src="{{loader.js}}"></script>
+<script src="{{fceux.js}}"></script>
 </body>
 </html>

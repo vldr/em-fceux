@@ -57,6 +57,9 @@ if 'EMSCRIPTEN_TOOL_PATH' in os.environ:
   env['NOCHEAT'] = 1
   env.Tool('emscripten', toolpath=[os.environ['EMSCRIPTEN_TOOL_PATH']])
   env.Replace(PROGSUFFIX = [".js"])
+  common = ''
+  common += ' -s STRICT=1 -fno-exceptions -fno-rtti'
+  env.Append(CCFLAGS = common, LINKFLAGS = common)
   exportsList = [
     'main',
     'FCEM_OnSaveGameInterval',
@@ -233,7 +236,6 @@ print "base CCFLAGS:",env['CCFLAGS']
 if env['DEBUG']:
   if env['EMSCRIPTEN']:
     common = ''
-    common += ' -s STRICT=1'
     common += ' -O0 -g'
     common += ' -s ASSERTIONS=2 -s SAFE_HEAP=1'
     common += ' -s DEMANGLE_SUPPORT=1'
@@ -244,9 +246,7 @@ if env['DEBUG']:
 if env['RELEASE']:
   if env['EMSCRIPTEN']:
     common = ''
-    common += ' -s STRICT=1'
     common += ' -O3 --llvm-lto 3'
-    common += ' -fno-exceptions -fno-rtti'
     common += ' -s AGGRESSIVE_VARIABLE_ELIMINATION=1'
     common += ' -s ASSERTIONS=0'
     env.Append(CCFLAGS = common)

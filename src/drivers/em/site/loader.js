@@ -369,13 +369,6 @@ setControllerEl : function(id, val) {
 		el.checked = val;
 	}
 },
-setProgress : (function(x) {
-	var el = document.getElementById('progress');
-	return function(x) {
-		x = (x > 1) ? 1 : ((x < 0) ? 0 : x);
-		el.style.width = 3 * ((42*x) |0) + 'px';
-	};
-})(),
 scanForGamepadBinding : function() {
   if (navigator && navigator.getGamepads) {
     var gamepads = navigator.getGamepads();
@@ -416,8 +409,6 @@ window.onbeforeunload = function (ev) {
   return 'To prevent save game data loss, please let the game run at least one second after saving and before closing the window.';
 };
 
-var loaderEl = document.getElementById('loader');
-
 var Module = {
   preRun: [function() {
     // Mount IndexedDB file system (IDBFS) to /fceux.
@@ -457,49 +448,7 @@ var Module = {
   canvas3D: (function() {
     return document.getElementById('canvas3D');
   })(),
-  setStatus: function(text) {
-    var dl = 'Downloading data...';
-// TODO: tsone: add startswith() method?
-    if (text.substring(0, dl.length) === dl) {
-      var r = text.match(/\(([\d.]+)\/([\d.]+)\)/);
-      var x = parseFloat(r[1]) / parseFloat(r[2]);
-      FCEV.setProgress(0.75 + 0.25*x);
-    }
-    if (!text) {
-      loaderEl.hidden = true;
-    }
-  },
-  totalDependencies: 0,
-  monitorRunDependencies: function(left) {
-    this.totalDependencies = Math.max(this.totalDependencies, left);
-    Module.setStatus(left ? 'Preparing... (' + (this.totalDependencies-left) + '/' + this.totalDependencies + ')' : 'All downloads complete.');
-  }
 };
-Module.setStatus('Loading...');
-window.onerror = function(event) {
-  Module.setStatus = function(text) {
-    if (text) Module.printErr('[post-exception status] ' + text);
-  };
-};
-
-var req = new XMLHttpRequest();
-req.addEventListener('progress', function(event) {
-	var x = event.loaded / FCEC.FCEUX_JS_SIZE;
-	FCEV.setProgress(0.75 * x);
-}, false);
-req.addEventListener('load', function(event) {
-	var e = event.target;
-	var blob = new Blob([ e.responseText ]);
-	var s = document.createElement('script');
-	var url = URL.createObjectURL(blob);
-	s.onload = s.onerror = function() {
-		URL.revokeObjectURL(url);
-	}
-	s.src = url;
-	document.documentElement.appendChild(s);
-}, false);
-req.open("GET", "{{fceux.js}}", true);
-req.send();
 
 function dragHandler(text) {
   return function(ev) {
