@@ -54,7 +54,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 </div>
 
 <canvas class="emscripten" id="canvas" oncontextmenu="event.preventDefault()"></canvas>
-<canvas class="emscripten" id="canvas3D" oncontextmenu="event.preventDefault()"></canvas>
 
 <noscript id="noscript">
   PLEASE ENABLE JAVASCRIPT em-fceux requires JavaScript
@@ -86,7 +85,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
       <tr><td>Controller Port 1<td><select disabled><option>Gamepad</option></select>
       <tr><td>Controller Port 2<td><select id="port2" onchange="FCEM.setLocalController(PORT2, this.value)"><option value="0">Gamepad</option><option value="1">Zapper</option></select>
       <tr><td>Video System<td><select id="video_system" onchange="FCEM.setLocalController(VIDEO_SYSTEM, this.value)"><option value="-1">(Auto)</option><option value="0">NTSC</option><option value="1">PAL</option></select>
-      <tr><td>Use WebGL<td><input id="webgl_enabled" type="checkbox" oninput="FCEM.setLocalController(WEBGL_ENABLED, this.checked)" onchange="FCEM.setLocalController(WEBGL_ENABLED, this.checked)"/><label for="webgl_enabled"></label>
     </table>
     <p><input type="button" value="Reset to Defaults" onclick="FCEM.initControllers(true)" />
     <p><i><small>* NTSC composite signal path emulation.</small></i>
@@ -119,7 +117,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
     <table hidden>
       <tr id="keyBindProto"><td><td><td><td data-id="" data-name=""><input type="button" value="Set" onclick="FCEV.catchStart(this.parentNode);" /> <input type="button" value="Clear" onclick="FCEM.clearBinding(this.parentNode);" />
     </table>
-    
+
     <p>Click 'Set' button to change bindings for an input. Click 'Clear' to remove the binding.
     <p><table id="keyBindTable"><tr><td><b>Input</b><td><b>Keyboard</b><td><b>Gamepad</b><td><b>Options</b></table>
     <br/>
@@ -150,14 +148,14 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
     <h2>EM-FCEUX</h2>
     <p>em-fceux is an <a href="http://emscripten.org/">Emscripten</a> port of <a href="http://www.fceux.com/">FCEUX</a>.
     Code: <a href="https://bitbucket.org/tsone/em-fceux/">https://bitbucket.org/tsone/em-fceux/</a>
-    
+
     <h3>INSTRUCTIONS</h3>
     <p>To play a game, drag and drop it (ROM file etc.) on this browser window.
     Played games are added to the game stack on the right. Play the game again by clicking it on the stack.
     <p>To remove a game, click <img src="{{img/x.gif}}" width=19 height=19 alt="X icon"/> on the game.
     This doesn't remove save data however. Built-in games cannot be removed.
     <p>Supported file formats are: <i>.nes, .nsf, .zip</i>
-    
+
     <h3>INPUTS</h3>
 
     <p>Input bindings can be customized by clicking <img src="{{img/dpad_sm.gif}}" width=20 height=20 alt="key bindings icon" /> icon in top right corner of the window.
@@ -184,7 +182,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
     <h3>SETTINGS TAB</h3>
     <p>The settings tab is revealed by clicking the (pixelated) triangle on the left.
     The tab has controllers for composite NTSC and TV emulation, gamma, sharpness, color etc.
-    
+
     <h3>TROUBLESHOOTING</h3>
     <p>In case of issues with audio or the site is not working at all, try using a recent web browser,
     such as Firefox, Chromium, Chrome, Safari or Opera. Internet Explorer 11 will not work.
@@ -192,7 +190,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
     <p>In case a game appears running too fast, try changing to PAL mode in the settings.
     <p>The user interface and inputs are designed for keyboard and mouse. There is no support (yet) for touch-only devices.
     <p>To file a bug or a feature request, do it in the project <a href="https://bitbucket.org/tsone/em-fceux/issues?status=new&status=open">issue tracker</a>. This may require a bitbucket.org account.
-    
+
     <h3>NOTES</h3>
     <p>Games and save data are stored locally in the web browser and are never transmitted out of the browser.
     Extracting the games and save data from the browser (for backups etc.) is not supported.

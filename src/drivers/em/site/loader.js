@@ -1,18 +1,18 @@
 /**
  * @license
- * 
+ *
  * Copyright (C) 2015  Valtteri "tsone" Heikkila
- * 
+ *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 2
  * of the License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
@@ -54,7 +54,7 @@ toggleSound : (function() {
       FS.mkdir('/fceux/rom');
     } catch (e) {
     }
-    // var savs = findFiles('/data/'); 
+    // var savs = findFiles('/data/');
     // savs.forEach(function(x) { console.log('!!!! sav: ' + x); });
     FCEM.updateGames();
     FCEM.updateStack();
@@ -91,7 +91,7 @@ toggleSound : (function() {
   updateGames : function() {
     var games = [];
     var addGamesIn = function(path, deletable) {
-      var files = findFiles(path); 
+      var files = findFiles(path);
       files.forEach(function(filename) {
         var split = PATH.splitPath(filename);
         var label = split[2].slice(0, -split[3].length).toUpperCase();
@@ -115,19 +115,19 @@ toggleSound : (function() {
     var scrollPos = stackContainer.scrollTop;
     var list = document.getElementById("stack");
     var proto = document.getElementById("cartProto");
-  
+
     while (list.firstChild != list.lastChild) {
       list.removeChild(list.lastChild);
     }
-  
+
     for (var i = 0; i < games.length; i++) {
       var item = games[i];
       var el = proto.cloneNode(true);
-  
+
       el.dataset.idx = i;
       el.style.backgroundPosition = item.offset + 'px 0px';
       list.appendChild(el);
-  
+
       var label = el.firstChild.firstChild.firstChild;
       label.innerHTML = item.label;
 
@@ -147,7 +147,7 @@ toggleSound : (function() {
         el.firstChild.lastChild.hidden = true;
       }
     }
-  
+
     stackContainer.scrollTop = scrollPos;
   },
   _getLocalInputDefault : function(id, type) {
@@ -445,9 +445,6 @@ var Module = {
     el.addEventListener("webglcontextlost", function(e) { alert('WebGL context lost. You will need to reload the page.'); e.preventDefault(); }, false);
     return el;
   })(),
-  canvas3D: (function() {
-    return document.getElementById('canvas3D');
-  })(),
 };
 
 function dragHandler(text) {
@@ -462,7 +459,7 @@ function dropHandler(ev) {
   var f = ev.dataTransfer.files[0];
   if (f && confirm('Do you want to run the game ' + f.name + ' and add it to stack?')) {
     var r = new FileReader();
-    r.onload = function(e) { 
+    r.onload = function(e) {
       var opts = {encoding:'binary'};
       var path = PATH.join2('/fceux/rom/', f.name);
       FS.writeFile(path, new Uint8Array(e.target.result), opts);

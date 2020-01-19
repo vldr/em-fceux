@@ -42,7 +42,7 @@ static int FReadString(FILE *fp, char *str, int n)
  {
   z=fgetc(fp);
   str[x]=z;
-  x++;  
+  x++;
   if(z<=0) break;
   if(x>=n) return 0;
  }
@@ -80,7 +80,7 @@ static void cfg_Parse(FILE *fp)
 			if(isnewline) goto done;
 			key = "";
 			value = "";
-			goto dokey; 
+			goto dokey;
 			break;
 		case COMMENT:
 			docomment:
@@ -147,7 +147,7 @@ static void GetValueR(FILE *fp, char *str, void *v, int c)
 			{
 				if(!(*(char **)v=(char*)malloc(s)))
 					goto gogl;
-				
+
 				fread(*(char **)v,1,s,fp);
 				continue;
 			}
@@ -157,7 +157,7 @@ static void GetValueR(FILE *fp, char *str, void *v, int c)
 				fseek(fp,s,SEEK_CUR);
 				continue;
 			}
-		
+
 			fread((uint8*)v,1,c,fp);
 		}
 		else
@@ -238,7 +238,7 @@ void LoadParse(CFGSTRUCT *cfgst, FILE *fp)
 
 		GetValueR(fp, cfgst[x].name, cfgst[x].ptr, cfgst[x].len);
 		x++;
-	} 
+	}
 }
 
 

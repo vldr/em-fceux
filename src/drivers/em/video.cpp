@@ -31,12 +31,7 @@ extern uint8 *XBuf;
 extern uint8 deempScan[240];
 extern uint8 PALRAM[0x20];
 
-
-int Video_webgl_supported = 0;
-
-
 static int s_inited;
-static int s_webgl = -1;
 
 static int s_window_width, s_window_height;
 static int s_canvas_width, s_canvas_height;
@@ -53,15 +48,6 @@ void FCEUD_GetPalette(uint8 index, uint8 *r, uint8 *g, uint8 *b)
 bool FCEUD_ShouldDrawInputAids()
 {
 	return false;
-}
-
-static void CallUpdateController(int idx, double v)
-{
-	if (s_webgl) {
-		ES2_UpdateController(idx, v);
-	} else {
-		Canvas2D_UpdateController(idx, v);
-	}
 }
 
 static double GetAspect()
@@ -104,19 +90,12 @@ static void Resize()
 	// and remove the style attribute. See Emscripten's updateCanvasDimensions()
 	// in library_browser.js for the faulty code.
 	EM_ASM_INT({
-		var canvas = Module.canvas2D;
+		const canvas = Module.canvas;
+		canvas.width = canvas.widthNative = $0;
+		canvas.height = canvas.heightNative = $1;
 		canvas.style.setProperty( "width", $0 + "px", "important");
 		canvas.style.setProperty("height", $1 + "px", "important");
-
-		if ($2) {
-			canvas = Module.canvas3D;
-			canvas.width = canvas.widthNative = $0;
-			canvas.height = canvas.heightNative = $1;
-			canvas.style.setProperty( "width", $0 + "px", "important");
-			canvas.style.setProperty("height", $1 + "px", "important");
-		}
-
-	}, s_canvas_width, s_canvas_height, Video_webgl_supported);
+	}, s_canvas_width, s_canvas_height);
 
 	ES2_SetViewport(s_canvas_width, s_canvas_height);
 }
@@ -128,7 +107,6 @@ void FCEUD_VideoChanged()
 	em_sound_frame_samples = em_sound_rate / (FSettings.PAL ? PAL_FPS : NTSC_FPS);
 	em_scanlines = FSettings.PAL ? 240 : 224;
 
-	Canvas2D_VideoChanged();
 	ES2_VideoChanged();
 	Resize();
 }
@@ -147,38 +125,7 @@ void Video_Render(int draw_splash)
 		Splash_Draw();
 	}
 
-	if (s_webgl) {
-		ES2_Render(XBuf, deempScan, PALRAM[0]);
-	} else {
-		Canvas2D_Render(XBuf, deempScan, PALRAM[0]);
-	}
-}
-
-void Video_EnableWebGL(int enable)
-{
-	enable = enable ? Video_webgl_supported : 0;
-
-	EM_ASM_ARGS({
-		if ($0) {
-			Module.canvas = Module.canvas3D;
-			Module.ctx = Module.ctx3D;
-			Module.canvas3D.style.display = 'block';
-			Module.canvas2D.style.display = 'none';
-		} else {
-			Module.canvas = Module.canvas2D;
-			Module.ctx = Module.ctx2D;
-			Module.canvas3D.style.display = 'none';
-			Module.canvas2D.style.display = 'block';
-		}
-
-		Module.useWebGL = $0;
-	}, enable);
-
-	s_webgl = enable;
-
-	for (int i = FCEM_BRIGHTNESS; i <= FCEM_NOISE; ++i) {
-		CallUpdateController(i, Config_GetValue(i));
-	}
+	ES2_Render(XBuf, deempScan, PALRAM[0]);
 }
 
 // Return 0 on success, -1 on failure.
@@ -194,21 +141,12 @@ int Video_Init()
 
 	emscripten_set_resize_callback(EMSCRIPTEN_EVENT_TARGET_WINDOW, 0, 0, FCEM_ResizeCallback);
 
-	// Init both 2D and WebGL (3D) canvases and contexts.
-	FCEU_printf("Initializing canvas 2D context.\n");
-	Canvas2D_Init();
-	Input_RegisterCallbacksForCanvas();
 	FCEU_printf("Initializing WebGL.\n");
-	// NOTE: Following reset of canvas and ctx is required by ES2_Init().
-	EM_ASM({
-		Module.canvas = Module.canvas3D;
-		Module.ctx = null;
-	});
-	Video_webgl_supported = ES2_Init(GetAspect());
-	if (Video_webgl_supported) {
-		// NOTE: Register callbacks also for WebGL canvas (which is here current).
-		Input_RegisterCallbacksForCanvas();
+	if (!ES2_Init(GetAspect())) {
+		puts("ERROR: Failed to initialize video, WebGL not supported.");
+		return 0;
 	}
+	Input_RegisterCallbacksForCanvas();
 
 	// HACK: Manually resize to cover the window inner size.
 	// Apparently there's no way to do this with Emscripten...?
@@ -241,5 +179,5 @@ void Video_UpdateController(int idx, double v)
 		);
 	}
 
-	CallUpdateController(idx, v);
+	ES2_UpdateController(idx, v);
 }

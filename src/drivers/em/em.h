@@ -173,19 +173,12 @@ void Sound_Write(int32 *Buffer, int Count);
 int  Sound_GetBufferCount(void);
 void Sound_Silence(int option);
 
-extern int Video_webgl_supported;
 int  Video_Init();
 void Video_Render(int draw_splash);
-void Video_EnableWebGL(int enable);
 void Video_UpdateController(int idx, double v);
 void Video_CanvasToNESCoords(uint32 *x, uint32 *y);
 
 void Splash_Draw();
-
-void Canvas2D_Init();
-void Canvas2D_VideoChanged();
-void Canvas2D_Render(uint8 *pixels, uint8 *row_deemp, uint8 overscan_color);
-void Canvas2D_UpdateController(int idx, double v);
 
 bool FCEUD_ShouldDrawInputAids();
 bool FCEUI_AviDisableMovieMessages();

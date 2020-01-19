@@ -234,9 +234,6 @@ void FCEM_SetController(int idx, double v)
 			FCEUD_VideoChanged();
 		}
 		break;
-	case FCEM_WEBGL_ENABLED:
-		Video_EnableWebGL(v);
-		break;
 	default:
 		if ((idx >= FCEM_BRIGHTNESS) && (idx <= FCEM_NOISE)) {
 			Video_UpdateController(idx, v);

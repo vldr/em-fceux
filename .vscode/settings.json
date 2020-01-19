@@ -2,5 +2,6 @@
     "files.exclude": {
         "**/*.o": true,
         "src/drivers/em/**/fceux.{js,wasm,wasm.map,wast,data}": true
-    }
+    },
+    "files.trimTrailingWhitespace": true
 }
