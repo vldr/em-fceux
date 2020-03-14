@@ -47,7 +47,7 @@ New features:
 
 ## API
 
-See [API.md](API.md).
+See [API.md](https://bitbucket.org/tsone/em-fceux/src/master/API.md).
 
 ## Build
 
@@ -89,7 +89,7 @@ in a fragment shader.
 
 ## Contact
 
-Authored by Valtteri "tsone" Heikkilä. See git commits for email.
+Authored by Valtteri "tsone" Heikkilä.
 
 Please submit bugs and feature requests in the
 [em-fceux issue tracker](https://bitbucket.org/tsone/em-fceux/issues?status=new&status=open).

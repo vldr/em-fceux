@@ -1,15 +1,44 @@
 # Changelog for em-fceux
 
-## [Unreleased]
+## [1.0.1] - 2020-03-15
 
-### Changed
+### Added
 
-- Load fceux.js through script element (used Blob for progress bar).
+- First npm package release.
+- New and improved API. (See API.md.)
+- Use Emscripten embind.
+- Events.
+- Embed data and shaders files (instead of preload).
+- Use prettier.
 
 ### Removed
 
+- Site moved to separate project (em-fceux-site).
+- Input handling. (Use the new API to set controller inputs.)
+- Splash screen.
 - Software rendering (support WebGL only).
-- Site loading progress bar.
+- IndexedDB/IDBFS and localStorage use.
+- Built-in games.
+- Use of window resize event.
+
+### Changed
+
+- Major design change as "emulator core" primarily used with npm.
+- To Emscripten module (MODULARIZE=1).
+- API init() creates Web Audio context.
+- Migrate scons files to python3.
+- Migrate Javascript to es2015 (also EM_ASM).
+- Rename driver sound.cpp -> audio.cpp.
+- Indentations as spaces (not in shaders though).
+- Major cleanup.
+
+### Fixed
+
+- Web Audio context issues.
+- Emscripten deprecations such as:
+  - Module.canvas use.
+  - Canvas element for emscripten_webgl_create_context().
+- Take account window.devicePixelRatio when resizing.
 
 ## [0.5.0] - 2020-01-11
 
