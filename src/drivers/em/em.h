@@ -26,157 +26,48 @@
 #include "../common/configSys.h"
 #include "ntsc.h"
 
+namespace emscripten
+{
+    class val;
+};
 
 #define FCEM_DEBUG 1 // Set to 0 to disable debug stuff.
 
-// TODO: tsone: currently unused (search input module for 'eoptions')
-// eoptions variable flags
-#define EO_NO8LIM      1
-#define EO_SUBASE      2
-#define EO_CLIPSIDES   8
-#define EO_SNAPNAME    16
-#define EO_FOURSCORE	32
-#define EO_NOTHROTTLE	64
-#define EO_GAMEGENIE	128
-#define EO_PAL		256
-#define EO_LOWPASS	512
-#define EO_AUTOHIDE	1024
-
-// Input device options
-#define NUM_INPUT_DEVICES 3
-// GamePad defaults
-#define GAMEPAD_NUM_DEVICES 4
-#define GAMEPAD_NUM_BUTTONS 10
-// PowerPad defaults
-#define POWERPAD_NUM_DEVICES 2
-#define POWERPAD_NUM_BUTTONS 12
-// QuizKing defaults
-#define QUIZKING_NUM_BUTTONS 6
-// HyperShot defaults
-#define HYPERSHOT_NUM_BUTTONS 4
-// Mahjong defaults
-#define MAHJONG_NUM_BUTTONS 21
-// TopRider defaults
-#define TOPRIDER_NUM_BUTTONS 8
-// FTrainer defaults
-#define FTRAINER_NUM_BUTTONS 12
-// FamilyKeyBoard defaults
-#define FAMILYKEYBOARD_NUM_BUTTONS 0x48
-
-#define BUTTC_KEYBOARD          0x00
-#define BUTTC_JOYSTICK          0x01
-#define BUTTC_MOUSE             0x02
-
-#define FCFGD_GAMEPAD   1
-#define FCFGD_POWERPAD  2
-#define FCFGD_HYPERSHOT 3
-#define FCFGD_QUIZKING  4
-
-// NOTE: tsone: new emscripten input options
-// Key code map size (including ctrl, shift, alt, meta key bits at 8,9,10,11)
-#define FCEM_KEY_MAP_SIZE (16*256)
-// Bitmask for FCEM_Input type and key.
-#define FCEM_INPUT_TYPE_MASK 0xF00
-#define FCEM_INPUT_KEY_MASK 0x0FF
-
-// Input ID enums and defines
-#define INPUT_PRE \
-enum FCEM_Input {\
-	FCEM_NULL = 0x0000,
-#define INPUT(i_,dk_,dg_,e_,t_) \
-	FCEM_ ## e_ = i_,
-#define INPUT_POST \
-	FCEM_INPUT_COUNT\
-};
-#include "input.inc.hpp"
-#undef INPUT_PRE
-#undef INPUT
-#undef INPUT_POST
-#define FCEM_GAMEPAD FCEM_GAMEPAD0_A
-#define FCEM_GAMEPAD_SIZE (FCEM_GAMEPAD1_A - FCEM_GAMEPAD0_A)
-
-// Controllers (config interface) enums and defines
-#define CONTROLLER_PRE \
-enum FCEM_Controller {
-#define CONTROLLER(i_,d_,e_,id_) \
-	FCEM_ ## e_ = i_,
-#define CONTROLLER_POST \
-	FCEM_CONTROLLER_COUNT\
-};
-#include "config.inc.hpp"
-#undef CONTROLLER_PRE
-#undef CONTROLLER
-#undef CONTROLLER_POST
-
-// Audio options
-// NOTE: tsone: both SOUND_BUF_MAX and SOUND_HW_BUF_MAX must be power of two!
-// NOTE: tsone: for 32-bit floating-point audio
-#define SOUND_RATE		48000
-#define SOUND_BUF_MAX		8192
-#define SOUND_HW_BUF_MAX	2048
-#define SOUND_QUALITY		0
-#define SOUND_BUF_MASK		(SOUND_BUF_MAX-1)
+// Audio options.
+// NOTE: Both AUDIO_BUF_MAX and AUDIO_HW_BUF_MAX must be power of two!
+#define AUDIO_BUF_MAX		8192
+#define AUDIO_HW_BUF_MAX	2048
+#define AUDIO_BUF_MASK		(AUDIO_BUF_MAX - 1)
 
 // SDL and Windows drivers use following values for FPS, however PAL FPS is
 // documented to be 50.0070 in http://wiki.nesdev.com/w/index.php/Clock_rate
 #define NTSC_FPS 60.0988
 #define PAL_FPS  50.0069
 
-#define GAMMA_NTSC 2.44
-#define GAMMA_SRGB 2.2
-
 #define INPUT_W     256 // Width of input PPU image by fceux (in px).
 #define INPUT_H     240 // Height of input PPU image by fceux (in px).
 
 // The rate of output and emulated (internal) audio (frequency, in Hz).
-extern int em_sound_rate;
+extern int em_audio_rate;
 // Number of audio samples per frame.
-extern double em_sound_frame_samples;
+extern double em_audio_frame_samples;
 // Number of scanlines to show in current video mode: NTSC -> 224, PAL -> 240.
 extern int em_scanlines;
-extern bool em_no_waiting;
 
-// TODO: tsone: fc extension port peripherals support
-#if PERI
-extern const char *PowerPadNames[POWERPAD_NUM_BUTTONS];
-extern const char *DefaultPowerPadDevice[POWERPAD_NUM_DEVICES];
-extern const int DefaultPowerPad[POWERPAD_NUM_DEVICES][POWERPAD_NUM_BUTTONS];
+extern std::string em_video_system;
 
-extern const char *QuizKingNames[QUIZKING_NUM_BUTTONS];
-extern const char *DefaultQuizKingDevice;
-extern const int DefaultQuizKing[QUIZKING_NUM_BUTTONS];
+bool Audio_Init();
+bool Audio_IsInitialized();
+void Audio_Write(int32 *buffer, int count);
+int  Audio_GetBufferCount();
+void Audio_SetMuted(bool muted);
+bool Audio_Muted();
 
-extern const char *HyperShotNames[HYPERSHOT_NUM_BUTTONS];
-extern const char *DefaultHyperShotDevice;
-extern const int DefaultHyperShot[HYPERSHOT_NUM_BUTTONS];
-
-extern const char *MahjongNames[MAHJONG_NUM_BUTTONS];
-extern const char *DefaultMahjongDevice;
-extern const int DefaultMahjong[MAHJONG_NUM_BUTTONS];
-
-extern const char *TopRiderNames[TOPRIDER_NUM_BUTTONS];
-extern const char *DefaultTopRiderDevice;
-extern const int DefaultTopRider[TOPRIDER_NUM_BUTTONS];
-
-extern const char *FTrainerNames[FTRAINER_NUM_BUTTONS];
-extern const char *DefaultFTrainerDevice;
-extern const int DefaultFTrainer[FTRAINER_NUM_BUTTONS];
-
-extern const char *FamilyKeyBoardNames[FAMILYKEYBOARD_NUM_BUTTONS];
-extern const char *DefaultFamilyKeyBoardDevice;
-extern const int DefaultFamilyKeyBoard[FAMILYKEYBOARD_NUM_BUTTONS];
-#endif //PERI
-
-int  Sound_Init();
-int  Sound_IsInitialized();
-void Sound_Write(int32 *Buffer, int Count);
-int  Sound_GetBufferCount(void);
-void Sound_Silence(int option);
-
-int  Video_Init();
+int  Video_Init(const char* canvasQuerySelector);
 void Video_Render(int draw_splash);
 void Video_UpdateController(int idx, double v);
 void Video_CanvasToNESCoords(uint32 *x, uint32 *y);
+bool Video_SetConfig(const std::string& key, const emscripten::val& value);
 
 void Splash_Draw();
 
@@ -186,16 +77,5 @@ bool FCEUI_AviEnableHUDrecording();
 void FCEUI_SetAviEnableHUDrecording(bool enable);
 bool FCEUI_AviDisableMovieMessages();
 void FCEUI_SetAviDisableMovieMessages(bool disable);
-
-void Config_Init();
-double  Config_GetValue(int idx);
-extern "C" {
-void FCEM_SetController(int idx, double v);
-}
-
-void Input_RegisterCallbacksForCanvas();
-void Input_BindPort(int portIdx, ESI peri);
-void FCEUD_UpdateInput(void);
-
 
 #endif // _EM_H_

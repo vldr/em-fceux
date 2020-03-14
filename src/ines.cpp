@@ -911,7 +911,24 @@ int iNESLoad(const char *name, FCEUFILE *fp, int OverwriteVidMode) {
 	return 1;
 }
 
-#ifndef __EMSCRIPTEN__
+#ifdef __EMSCRIPTEN__
+
+void System_LoadGameSave()
+{
+    if (GameInterface == iNESGI) {
+		FCEU_LoadGameSave(&iNESCart);
+    }
+}
+
+void System_SaveGameSave()
+{
+    if (GameInterface == iNESGI) {
+		FCEU_SaveGameSave(&iNESCart);
+    }
+}
+
+#else
+
 // bbit edited: the whole function below was added
 int iNesSave() {
 	FILE *fp;

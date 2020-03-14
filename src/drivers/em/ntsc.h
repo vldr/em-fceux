@@ -22,29 +22,22 @@
 
 
 // 64 palette colors, 8 color de-emphasis settings.
-#define NUM_COLORS	(64 * 8)
-#define NUM_PHASES	3
-#define NUM_SUBPS	4
-#define NUM_TAPS	5
+#define NUM_COLORS  (64 * 8)
+#define NUM_PHASES  3
+#define NUM_SUBPS   4
+#define NUM_TAPS    5
 // Lookup width must be POT >= NUM_PHASES*NUM_TAPS*NUM_SUBPS, ex. 3*5*4=60 -> 64
-#define LOOKUP_W	64
+#define LOOKUP_W    64
 
 
-struct NTSCControls
+struct NtscLookup
 {
-	float brightness;
-	float contrast;
-	float color;
-	float gamma;
-	float yiq_mins[3];
-	float yiq_maxs[3];
+    float yiq_mins[3];
+    float yiq_maxs[3];
+    const unsigned char* texture;
 };
 
-void ntscYIQ2RGB(double *rgb, const double *yiq);
-void ntscSetControls(double brightness, double contrast, double color, double gamma);
-const NTSCControls &ntscGetControls();
-const double *ntscGetLookup();
-const unsigned char *ntscGetLookupTex();
+const NtscLookup& ntscGetLookup();
 
 
 #endif /* _NTSC_H_ */

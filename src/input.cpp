@@ -652,10 +652,8 @@ const char* FCEUI_CommandTypeNames[]=
 	"TAS Editor",
 };
 
-// TODO: tsone: unused function, remove?
 #ifndef __EMSCRIPTEN__
 static void CommandUnImpl(void);
-#endif
 static void CommandToggleDip(void);
 static void CommandStateLoad(void);
 static void CommandStateSave(void);
@@ -861,13 +859,10 @@ void FCEUI_HandleEmuCommands(TestCommandState* testfn)
 	}
 }
 
-// TODO: tsone: unused func, remove?
-#ifndef __EMSCRIPTEN__
 static void CommandUnImpl(void)
 {
 	FCEU_DispMessage("command '%s' unimplemented.",0, FCEUI_CommandTable[i].name);
 }
-#endif
 
 static void CommandToggleDip(void)
 {
@@ -1243,3 +1238,5 @@ static void TaseditorCommand(void)
 		handleEmuCmdByTaseditor(execcmd);
 #endif
 }
+
+#endif //__EMSCRIPTEN__

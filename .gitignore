@@ -1,10 +1,12 @@
 .DS_Store
 *.o
+*.pyc
 *.blend?
 /.sconf_temp/
 /.sconsign.dblite
 /bin/
 /config.log
-/src/drivers/em/site/fceux.*
-/src/drivers/em/site/config.js
-/src/drivers/em/deploy/
+
+node_modules/
+dist/
+package-lock.json

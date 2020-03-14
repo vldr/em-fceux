@@ -444,7 +444,11 @@ FCEUGI *FCEUI_LoadGameVirtual(const char *name, int OverwriteVidMode, bool silen
 	}
 
 	//file opened ok. start loading.
+#ifndef __EMSCRIPTEN__
 	FCEU_printf("Loading %s...\n\n", fullname);
+#else
+	FCEU_printf("Loading game...\n\n");
+#endif
 	GetFileBase(fp->filename.c_str());
 	ResetGameLoaded();
 	//reset parameters so they're cleared just in case a format's loader doesn't know to do the clearing

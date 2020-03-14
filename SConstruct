@@ -59,23 +59,12 @@ if 'EMSCRIPTEN_TOOL_PATH' in os.environ:
   env.Replace(PROGSUFFIX = [".js"])
   common = ''
   common += ' -s STRICT=1 -fno-exceptions -fno-rtti'
+  common += ' --bind -DEMSCRIPTEN_HAS_UNBOUND_TYPE_NAMES=0'
+  common += ' -Wno-c++11-narrowing -Wno-deprecated-register'
+  common += ' -s MODULARIZE=1 -s EXPORT_NAME=FCEUX -s INVOKE_RUN=0 --post-js src/drivers/em/post.js'
+  common += ' -s EXTRA_EXPORTED_RUNTIME_METHODS=\'["FS"]\''
   env.Append(CCFLAGS = common, LINKFLAGS = common)
-  exportsList = [
-    'main',
-    'FCEM_OnSaveGameInterval',
-    'FCEM_SetController',
-    'FCEM_BindKey',
-    'FCEM_BindGamepad',
-    'FCEM_SilenceSound'
-  ]
-  runtimeExportsList = [
-    'cwrap'
-  ]
-  exports = '-s EXPORTED_FUNCTIONS=\'["_' + '","_'.join(exportsList) + '"]\''
-  env.Append(LINKFLAGS = exports)
-  exports = '-s EXTRA_EXPORTED_RUNTIME_METHODS=\'["' + '","'.join(runtimeExportsList) + '"]\''
-  env.Append(LINKFLAGS = exports)
-  env.Append(LINKFLAGS = '--preload-file src/drivers/em/assets/data/@/data/')
+  env.Append(LINKFLAGS = '--embed-file src/drivers/em/assets/data/@/data/')
 else:
   env['EMSCRIPTEN'] = 0
 
@@ -91,28 +80,28 @@ env['LIBS'] = []
 # Default compiler flags:
 env.Append(CCFLAGS = ['-Wall', '-Werror', '-Wno-write-strings', '-Wno-sign-compare', '-Wno-unused-local-typedefs'])
 
-if os.environ.has_key('PLATFORM'):
+if 'PLATFORM' in os.environ:
   env.Replace(PLATFORM = os.environ['PLATFORM'])
-if os.environ.has_key('CC'):
+if 'CC' in os.environ:
   env.Replace(CC = os.environ['CC'])
-if os.environ.has_key('CXX'):
+if 'CXX' in os.environ:
   env.Replace(CXX = os.environ['CXX'])
-if os.environ.has_key('WINDRES'):
+if 'WINDRES' in os.environ:
   env.Replace(WINDRES = os.environ['WINDRES'])
-if os.environ.has_key('CFLAGS'):
+if 'CFLAGS' in os.environ:
   env.Append(CCFLAGS = os.environ['CFLAGS'].split())
-if os.environ.has_key('CXXFLAGS'):
+if 'CXXFLAGS' in os.environ:
   env.Append(CXXFLAGS = os.environ['CXXFLAGS'].split())
-if os.environ.has_key('CPPFLAGS'):
+if 'CPPFLAGS' in os.environ:
   env.Append(CPPFLAGS = os.environ['CPPFLAGS'].split())
-if os.environ.has_key('LDFLAGS'):
+if 'LDFLAGS' in os.environ:
   env.Append(LINKFLAGS = os.environ['LDFLAGS'].split())
-if os.environ.has_key('PKG_CONFIG_PATH'):
+if 'PKG_CONFIG_PATH' in os.environ:
   env['ENV']['PKG_CONFIG_PATH'] = os.environ['PKG_CONFIG_PATH']
-if os.environ.has_key('PKG_CONFIG_LIBDIR'):
+if 'PKG_CONFIG_LIBDIR' in os.environ:
   env['ENV']['PKG_CONFIG_LIBDIR'] = os.environ['PKG_CONFIG_LIBDIR']
 
-print "platform: ", env['PLATFORM']
+print("platform: ", env['PLATFORM'])
 
 # compile with clang
 if env['CLANG']:
@@ -152,18 +141,18 @@ else:
     assert conf.CheckLibWithHeader('z', 'zlib.h', 'c', 'inflate;', 1), "please install: zlib"
   if env['SDL2']:
     if not conf.CheckLib('SDL2'):
-      print 'Did not find libSDL2 or SDL2.lib, exiting!'
+      print('Did not find libSDL2 or SDL2.lib, exiting!')
       Exit(1)
     env.Append(CPPDEFINES=["_SDL2"])
     env.ParseConfig('pkg-config sdl2 --cflags --libs')
   elif not env['EMSCRIPTEN']:
     if not conf.CheckLib('SDL'):
-      print 'Did not find libSDL or SDL.lib, exiting!'
+      print('Did not find libSDL or SDL.lib, exiting!')
       Exit(1)
     env.ParseConfig('sdl-config --cflags --libs')
   if env['GTK']:
     if not conf.CheckLib('gtk-x11-2.0'):
-      print 'Could not find libgtk-2.0, exiting!'
+      print('Could not find libgtk-2.0, exiting!')
       Exit(1)
     # Add compiler and linker flags from pkg-config
     config_string = 'pkg-config --cflags --libs gtk+-2.0'
@@ -202,7 +191,7 @@ else:
       env.Append(CCFLAGS = ["-I/usr/include/lua"])
       lua_available = True
     if lua_available == False:
-      print 'Could not find liblua, exiting!'
+      print('Could not find liblua, exiting!')
       Exit(1)
   # "--as-needed" no longer available on OSX (probably BSD as well? TODO: test)
   if env['PLATFORM'] != 'darwin':
@@ -213,11 +202,11 @@ else:
     gd = conf.CheckLib('gd', autoadd=1)
     if gd == 0:
       env['LOGO'] = 0
-      print 'Did not find libgd, you won\'t be able to create a logo screen for your avis.'
+      print('Did not find libgd, you won\'t be able to create a logo screen for your avis.')
 
   if env['EMSCRIPTEN']:
     conf.env.Append(CCFLAGS = "-DOPENGL")
-    env.Append(LIBS = ["GL", "idbfs.js"])
+    env.Append(LIBS = ["GL"])
   elif env['OPENGL'] and conf.CheckLibWithHeader('GL', 'GL/gl.h', 'c', autoadd=1):
     conf.env.Append(CCFLAGS = "-DOPENGL")
   conf.env.Append(CPPDEFINES = ['PSS_STYLE=1'])
@@ -230,8 +219,8 @@ if sys.byteorder == 'little' or env['PLATFORM'] == 'win32':
 if env['FRAMESKIP']:
   env.Append(CPPDEFINES = ['FRAMESKIP'])
 
-print "base CPPDEFINES:",env['CPPDEFINES']
-print "base CCFLAGS:",env['CCFLAGS']
+print("base CPPDEFINES:",env['CPPDEFINES'])
+print("base CCFLAGS:",env['CCFLAGS'])
 
 if env['DEBUG']:
   if env['EMSCRIPTEN']:

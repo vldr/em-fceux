@@ -18,6 +18,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 #include "es2util.h"
+#include "../../driver.h"
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
@@ -154,22 +155,20 @@ static GLuint compileShader(GLenum type, const char *src)
     glShaderSource(shader, 1, &src, 0);
     glCompileShader(shader);
 
-//    printf("%d\n", strlen(src));
-
     GLint value;
     glGetShaderiv(shader, GL_COMPILE_STATUS, &value);
     if (value == GL_FALSE) {
-        printf("ERROR: Shader compilation failed:\n");
+        FCEUD_PrintError("Shader compilation failed:");
         glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &value);
         if (value > 0) {
           char *buf = (char*) malloc(value);
           glGetShaderInfoLog(shader, value, 0, buf);
-          printf("%s\n", buf);
+          FCEUI_printf("%s\n", buf);
           free(buf);
         } else {
-            printf("ERROR: No shader info log!\n");
+            FCEUD_PrintError("No shader info log!");
         }
-        printf("Shader source:\n%s\n", src);
+        FCEUI_printf("Shader source:\n%s\n", src);
     }
 
     return shader;
@@ -222,32 +221,32 @@ GLuint buildShader(const char *vert_src, const char *frag_src, const char *prepe
 
 static char *readShaderFile(const char *fn)
 {
-	FILE *f = fopen(fn, "rb");
-	if (!f) {
-        	printf("ERROR: Can't read shader file: %s\n", fn);
-		return 0;
-	}
-	fseek(f, 0, SEEK_END);
-	const size_t size = ftell(f);
-	fseek(f, 0, SEEK_SET);
-	char *result = (char*) malloc(size + 1);
-	fread(result, 1, size, f);
-	fclose(f);
-	result[size] = '\0';
-	return result;
+    FILE *f = fopen(fn, "rb");
+    if (!f) {
+        FCEUI_printf("ERROR: Can't read shader file: %s\n", fn);
+        return 0;
+    }
+    fseek(f, 0, SEEK_END);
+    const size_t size = ftell(f);
+    fseek(f, 0, SEEK_SET);
+    char *result = (char*) malloc(size + 1);
+    fread(result, 1, size, f);
+    fclose(f);
+    result[size] = '\0';
+    return result;
 }
 
 GLuint buildShaderFile(const char *vert_fn, const char *frag_fn, const char *prepend_src)
 {
-	char *vert_src = readShaderFile(vert_fn);
-	char *frag_src = readShaderFile(frag_fn);
-	GLuint ret = 0;
-	if (vert_src && frag_src) {
-		ret = buildShader(vert_src, frag_src, prepend_src);
-	}
-	free(vert_src);
-	free(frag_src);
-	return ret;
+    char *vert_src = readShaderFile(vert_fn);
+    char *frag_src = readShaderFile(frag_fn);
+    GLuint ret = 0;
+    if (vert_src && frag_src) {
+        ret = buildShader(vert_src, frag_src, prepend_src);
+    }
+    free(vert_src);
+    free(frag_src);
+    return ret;
 }
 
 void deleteShader(GLuint *prog)
@@ -279,7 +278,7 @@ void createTex(GLuint *tex, int w, int h, GLenum format, GLenum filter, GLenum w
     glBindTexture(GL_TEXTURE_2D, *tex);
     glTexImage2D(GL_TEXTURE_2D, 0, format, w, h, 0, format, GL_UNSIGNED_BYTE, data);
 
-// TODO: tsone: no mipmaps, remove?
+// TODO: No mipmaps. Remove?
 /*
     if ((min_filter == GL_LINEAR_MIPMAP_LINEAR)
             || (min_filter == GL_LINEAR_MIPMAP_NEAREST)
@@ -321,7 +320,7 @@ void deleteFBTex(GLuint *tex, GLuint *fb)
     }
 }
 
-// TODO: tsone: disabled for now...?
+// TODO: Disabled for now...
 #if 0
 // Inverse edge length weighted method. As described in Real-time rendering (3rd ed.) p.546.
 // Ref: Max, N. L., (1999) 'Weights for computing vertex normals from facet normals'
@@ -407,7 +406,7 @@ void createMesh(ES2Mesh *p, int num_verts, int num_varrays, ES2VArray *varrays, 
         }
     }
 
-// DEBUG: tsone: code to find mesh AABB
+// DEBUG: Code to find mesh AABB.
 #if 0
     GLfloat mins[3] = { .0f, .0f, .0f }, maxs[3] = { .0f, .0f, .0f };
     for (int i = 0; i < 3*num_verts; i += 3) {
@@ -419,11 +418,11 @@ void createMesh(ES2Mesh *p, int num_verts, int num_varrays, ES2VArray *varrays, 
             }
         }
     }
-    printf("verts:%d aabb: min:%.5f,%.5f,%.5f max:%.5f,%.5f,%.5f\n", num_verts,
+    FCEUI_printf("verts:%d aabb: min:%.5f,%.5f,%.5f max:%.5f,%.5f,%.5f\n", num_verts,
         mins[0], mins[1], mins[2], maxs[0], maxs[1], maxs[2]);
 #endif
 
-// TODO: tsone: testing normal generation in code. would save some space
+// TODO: Testing normal generation in code... Might save some space.
 #if 0
         GLfloat *ns = meshGenerateNormals(num_verts, num_elems, verts, elems);
         createBuffer(&p->norm_buf, GL_ARRAY_BUFFER, 3*sizeof(GLfloat)*num_verts, ns);
@@ -487,7 +486,7 @@ int *createUniqueEdges(int *num_edges, int num_verts, int num_elems, const void 
     }
 
     int *edges = (int*) malloc(2*sizeof(int) * num_elems);
-//    int *face_edges = (int*) malloc(sizeof(int) * num_elems);
+    // int *face_edges = (int*) malloc(sizeof(int) * num_elems);
     int n = 0;
     // Find unique edges using O(n^2) process. Small, but not fast.
     for (int i = 0; i < num_elems; i += 3) {
@@ -501,7 +500,7 @@ int *createUniqueEdges(int *num_edges, int num_verts, int num_elems, const void 
                 int b1 = edges[k+1];
                 if (a0 == b1 && b0 == a1) {
                     // Duplicate edge with opposite direction.
-//                    k = -k;
+                    // k = -k;
                     break;
                 }
                 if (a0 == a1 && b0 == b1) {
@@ -515,7 +514,7 @@ int *createUniqueEdges(int *num_edges, int num_verts, int num_elems, const void 
                 n += 2;
             }
             // Set found edge as face edge.
-//            face_edges[i+j] = k / 2;
+            // face_edges[i+j] = k / 2;
         }
     }
 

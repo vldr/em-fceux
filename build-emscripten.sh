@@ -1,5 +1,6 @@
 #!/bin/bash
 set -eEuo pipefail
+cd `dirname "$0"` && SCRIPT_DIR=`pwd -P`
 
 hash scons 2>/dev/null || { echo >&2 "ERROR: scons not found. Please install scons."; exit 1; }
 hash python 2>/dev/null || { echo >&2 "ERROR: python not found. Please install python."; exit 1; }
@@ -13,13 +14,3 @@ echo $EMSCRIPTEN_ROOT
 
 NUM_CPUS=`getconf _NPROCESSORS_ONLN`
 emscons scons -j $NUM_CPUS $@
-
-# TODO: tsone: following should be added to Scons scripts?
-config_js=src/drivers/em/site/config.js
-input_inc=src/drivers/em/input.inc.hpp
-config_inc=src/drivers/em/config.inc.hpp
-echo "// WARNING! AUTOMATICALLY GENERATED FILE. DO NOT EDIT." > $config_js
-emcc -D 'CONTROLLER_PRE=' -D 'CONTROLLER_POST=' -D 'CONTROLLER(i_,d_,e_,id_)=var e_ = i_;' -E $config_inc -P >> $config_js
-emcc -D 'CONTROLLER_PRE=var FCEC = { controllers : {' -D 'CONTROLLER_POST=},' -D 'CONTROLLER(i_,d_,e_,id_)=i_ : [ d_, id_ ],' -E $config_inc -P >> $config_js
-emcc -D 'INPUT_PRE=inputs : {' -D 'INPUT_POST=} };' -D 'INPUT(i_,dk_,dg_,e_,t_)=i_ : [ dk_, dg_, t_ ],' -E $input_inc -P >> $config_js
-echo "Generated $config_js"

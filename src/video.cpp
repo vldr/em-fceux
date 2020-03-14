@@ -445,12 +445,15 @@ void FCEU_PutImage(void)
 	DrawMessage(false);
 #endif //__EMSCRIPTEN__
 }
+
+#ifndef __EMSCRIPTEN__
 void snapAVI()
 {
 	//Update AVI
 	if(!FCEUI_EmulationPaused())
 		FCEUI_AviVideoUpdate(XBuf);
 }
+#endif
 
 void FCEU_DispMessageOnMovie(char *format, ...)
 {

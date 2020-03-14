@@ -1,7 +1,10 @@
 {
     "files.exclude": {
         "**/*.o": true,
-        "src/drivers/em/**/fceux.{js,wasm,wasm.map,wast,data}": true
     },
-    "files.trimTrailingWhitespace": true
+    "files.trimTrailingWhitespace": true,
+    "C_Cpp.default.defines": [
+        "__EMSCRIPTEN__=1",
+        "${default}"
+    ]
 }
