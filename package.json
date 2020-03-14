@@ -28,11 +28,11 @@
     "API.md",
     "CHANGELOG.md",
     "COPYING",
+    "dist/fceux.js",
+    "dist/fceux.wasm",
     "index.d.ts",
     "package.json",
-    "README.md",
-    "dist/fceux.js",
-    "dist/fceux.wasm"
+    "README.md"
   ],
   "scripts": {
     "build": "npm run build:docs && npm run prettier && ./build-emscripten.sh",
