@@ -152,14 +152,20 @@ static void SetSampleRate(int sample_rate)
 static int ContextInit()
 {
     return EM_ASM_INT({
+        const context = Module._audioContext;
+        const source = context.createBufferSource();
+
         // Always mono (1 channel).
-        Module.scriptProcessorNode = Module._audioContext.createScriptProcessor($0, 0, 1);
-        Module.scriptProcessorNode.onaudioprocess = function(ev) {
+        const processor = context.createScriptProcessor($0, 0, 1);
+        Module.scriptProcessorNode = processor;
+        source.connect(processor); // For iOS/iPadOS 13 Safari, processor requires a source.
+        processor.onaudioprocess = function(ev) {
             Module.currentOutputBuffer = ev.outputBuffer;
             Module.dynCall_v($1);
         };
-        Module.scriptProcessorNode.connect(Module._audioContext.destination);
-        return Module._audioContext.sampleRate;
+        processor.connect(context.destination);
+
+        return context.sampleRate;
     }, AUDIO_HW_BUF_MAX, AudioCallback);
 }
 

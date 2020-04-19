@@ -5,6 +5,7 @@ source_list = Split("""
   audio.cpp
   em.cpp
   es2.cpp
+  es2tv.cpp
   es2util.cpp
   ntsc.cpp
   splash.cpp

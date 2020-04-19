@@ -24,7 +24,6 @@
 #include "../common/args.h"
 #include "../common/config.h"
 #include "../common/configSys.h"
-#include "ntsc.h"
 
 namespace emscripten
 {

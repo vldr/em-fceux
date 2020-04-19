@@ -1,11 +1,46 @@
 #ifndef _ES2_H_
 #define _ES2_H_
+#include "em.h"
 #include "es2util.h"
+#include "ntsc.h"
+
+// TODO: Set elsewhere?
+#define DBG_MODE 0
+#if DBG_MODE
+#define DBG(x_) x_;
+extern void updateUniformsDebug();
+#else
+#define DBG(x_)
+#endif
 
 // Set overscan on left and right sides as 12px (total 24px).
 #define OVERSCAN_W  12
 #define IDX_W       (INPUT_W + 2*OVERSCAN_W)
 #define IDX_H       INPUT_H
+
+#define SCREEN_W    (NUM_SUBPS * INPUT_W)
+#define SCREEN_H    (4 * IDX_H)
+
+// Texture units.
+// For normal pipeline:
+#define IDX_I           0
+#define DEEMP_I         1
+#define LOOKUP_I        2
+#define RGB_I           3
+#define SHARPEN_I       4
+// For TV pipeline:
+#define TV_I            0
+#define DOWNSAMPLE0_I   4 // Used temporarily.
+#define DOWNSAMPLE1_I   1
+#define DOWNSAMPLE2_I   5 // Used temporarily.
+#define DOWNSAMPLE3_I   2
+#define DOWNSAMPLE4_I   6 // Used temporarily.
+#define DOWNSAMPLE5_I   3
+// Shared by both pipelines:
+#define STRETCH_I       5
+#define NOISE_I         6
+
+#define TEX(i_) (GL_TEXTURE0+(i_))
 
 // Uniforms.
 #define ES2UniformsSpec \
@@ -106,10 +141,18 @@ typedef struct t_ES2
 
 } ES2;
 
+extern ES2 s_p;
+extern ES2Uniforms s_u;
+extern const char ES2_common_shader_src[];
+
 int ES2_Init(const char* canvasQuerySelector, double aspect);
 void ES2_UpdateController(int idx, double v);
 void ES2_SetViewport(int width, int height);
 void ES2_VideoChanged();
 void ES2_Render(uint8 *pixels, uint8 *row_deemp, uint8 overscan_color);
+
+void ES2_TVInit();
+void ES2_TVVideoChanged();
+void ES2_TVRender();
 
 #endif

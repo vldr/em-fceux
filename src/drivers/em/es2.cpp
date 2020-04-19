@@ -17,15 +17,12 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
-#include "em.h"
 #include "es2.h"
-#include "ntsc.h"
 #include <cmath>
 #include <emscripten.h>
 #include <emscripten/html5.h>
 #include <emscripten/bind.h>
 #include "es2util.h"
-#include "meshes.h"
 #include "../../fceu.h"
 #include "../../ines.h"
 
@@ -41,32 +38,6 @@ static double em_video_noise = 0.3;
 #define STR(s_) _STR(s_)
 #define _STR(s_) #s_
 
-// TODO: Set elsewhere?
-#define DBG_MODE 0
-#if DBG_MODE
-#define DBG(x_) x_;
-#else
-#define DBG(x_)
-#endif
-
-#define IDX_I           0
-#define DEEMP_I         1
-#define LOOKUP_I        2
-#define RGB_I           3
-#define STRETCH_I       4
-// NOTE: TV and downsample texture must be in incremental order.
-#define TV_I            5
-#define DOWNSAMPLE0_I   6
-#define DOWNSAMPLE1_I   7
-#define DOWNSAMPLE2_I   8
-#define DOWNSAMPLE3_I   9
-#define DOWNSAMPLE4_I   10
-#define DOWNSAMPLE5_I   11
-#define NOISE_I         12
-#define SHARPEN_I       13
-
-#define TEX(i_) (GL_TEXTURE0+(i_))
-
 #define PERSISTENCE_R   0.165 // Red phosphor persistence.
 #define PERSISTENCE_G   0.205 // Green "
 #define PERSISTENCE_B   0.225 // Blue "
@@ -74,13 +45,11 @@ static double em_video_noise = 0.3;
 #define NOISE_W     256
 #define NOISE_H     256
 #define RGB_W       (NUM_SUBPS * IDX_W)
-#define SCREEN_W    (NUM_SUBPS * INPUT_W)
-#define SCREEN_H    (4 * IDX_H)
 
-static ES2 s_p;
-static ES2Uniforms s_u;
+ES2 s_p;
+ES2Uniforms s_u;
 
-static const char common_src[] = "precision mediump float;\n";
+const char ES2_common_shader_src[] = "precision mediump float;\n";
 
 static const GLint mesh_quad_vert_num = 4;
 static const GLint mesh_quad_face_num = 2;
@@ -107,28 +76,6 @@ static ES2VArray mesh_quad_varrays[] = {
     { 3, GL_FLOAT, 0, (const void*) mesh_quad_norms },
     { 2, GL_FLOAT, 0, (const void*) mesh_quad_uvs }
 };
-
-static ES2VArray mesh_screen_varrays[] = {
-    { 3, GL_FLOAT, 0, (const void*) mesh_screen_verts },
-    { 3, GL_FLOAT, VARRAY_ENCODED_NORMALS, (const void*) mesh_screen_norms },
-    { 2, GL_FLOAT, 0, (const void*) mesh_screen_uvs }
-};
-
-static ES2VArray mesh_rim_varrays[] = {
-    { 3, GL_FLOAT, 0, (const void*) mesh_rim_verts },
-    { 3, GL_FLOAT, VARRAY_ENCODED_NORMALS, (const void*) mesh_rim_norms },
-    { 3, GL_FLOAT, 0, 0 },
-    // { 3, GL_FLOAT, (const void*) mesh_rim_vcols }
-    { 3, GL_UNSIGNED_BYTE, 0, (const void*) mesh_rim_vcols }
-};
-
-// Texture sample offsets and weights for gaussian w/ radius=8, sigma=4.
-// Eliminates aliasing and blurs for "faked" glossy reflections and AO.
-static const GLfloat s_downsample_offs[] = { -6.892337f, -4.922505f, -2.953262f, -0.98438f, 0.98438f, 2.953262f, 4.922505f, 6.892337f };
-static const GLfloat s_downsample_ws[] = { 0.045894f, 0.096038f, 0.157115f, 0.200954f, 0.200954f, 0.157115f, 0.096038f, 0.045894f };
-
-static const int s_downsample_widths[]  = { SCREEN_W, SCREEN_W/4, SCREEN_W/4,  SCREEN_W/16, SCREEN_W/16, SCREEN_W/64, SCREEN_W/64 };
-static const int s_downsample_heights[] = { SCREEN_H, SCREEN_H,   SCREEN_H/4,  SCREEN_H/4,  SCREEN_H/16, SCREEN_H/16, SCREEN_H/64 };
 
 static void updateSharpenKernel()
 {
@@ -185,7 +132,7 @@ static void genNoiseTex()
 }
 
 #if DBG_MODE
-static void updateUniformsDebug()
+void updateUniformsDebug()
 {
     GLint prog = 0;
     glGetIntegerv(GL_CURRENT_PROGRAM, &prog);
@@ -243,47 +190,6 @@ static void updateUniformsStretch()
     DBG(updateUniformsDebug())
 }
 
-static void updateUniformsScreen(int video_changed)
-{
-    DBG(updateUniformsDebug())
-
-    if (video_changed) {
-        glUniform2f(s_u._screen_uv_scale_loc, 1.0 + 25.0/INPUT_W,
-            (em_scanlines/240.0) * (1.0 + 15.0/INPUT_H));
-        glUniform2f(s_u._screen_border_uv_offs_loc, 0.5 * (1.0 - 9.5/INPUT_W),
-            0.5 * (1.0 - (7.0 + INPUT_H - em_scanlines) / INPUT_H));
-    }
-}
-
-static void updateUniformsDownsample(int w, int h, int texIdx, int isHorzPass)
-{
-    DBG(updateUniformsDebug())
-    GLfloat offsets[2*8];
-    if (isHorzPass) {
-        for (int i = 0; i < 8; ++i) {
-            offsets[2*i  ] = s_downsample_offs[i] / w;
-            offsets[2*i+1] = 0;
-        }
-    } else {
-        for (int i = 0; i < 8; ++i) {
-            offsets[2*i  ] = 0;
-            offsets[2*i+1] = s_downsample_offs[i] / h;
-        }
-    }
-    glUniform2fv(s_u._downsample_offsets_loc, 8, offsets);
-    glUniform1i(s_u._downsample_downsampleTex_loc, texIdx);
-}
-
-static void updateUniformsTV()
-{
-    DBG(updateUniformsDebug())
-}
-
-static void updateUniformsCombine()
-{
-    DBG(updateUniformsDebug())
-}
-
 static void updateUniformsDirect(int video_changed)
 {
     DBG(updateUniformsDebug())
@@ -303,7 +209,6 @@ static const char* s_unif_names[] =
 ES2UniformsSpec
 #undef U
 };
-
 
 static void initUniformsRGB()
 {
@@ -347,109 +252,6 @@ static void initUniformsStretch()
     s_u._stretch_scanlines_loc = glGetUniformLocation(prog, "u_scanlines");
     s_u._stretch_smoothenOffs_loc = glGetUniformLocation(prog, "u_smoothenOffs");
     updateUniformsStretch();
-}
-
-// Generated with following python oneliners:
-// from math import *
-// def rot(a,b): return [sin(a)*sin(b), -sin(a)*cos(b), -cos(a)]
-// def rad(d): return pi*d/180
-// rot(rad(90-65),rad(15))
-//static GLfloat s_lightDir[] = { -0.109381654946615, 0.40821789367673483, 0.9063077870366499 }; // 90-65, 15
-//static GLfloat s_lightDir[] = { -0.1830127018922193, 0.6830127018922193, 0.7071067811865476 }; // 90-45, 15
-//static GLfloat s_lightDir[] = { -0.22414386804201336, 0.8365163037378078, 0.5000000000000001 }; // 90-30, 15
-static const GLfloat s_lightDir[] = { 0.0, 0.866025, 0.5 }; // 90-30, 0
-static const GLfloat s_viewPos[] = { 0, 0, 2.5 };
-static const GLfloat s_xAxis[] = { 1, 0, 0 };
-static const GLfloat s_shadowPoint[] = { 0, 0.7737, 0.048 };
-
-static void initShading(GLuint prog, float intensity, float diff, float fill, float spec, float m, float fr0, float frexp)
-{
-    int k = glGetUniformLocation(prog, "u_lightDir");
-    glUniform3fv(k, 1, s_lightDir);
-    k = glGetUniformLocation(prog, "u_viewPos");
-    glUniform3fv(k, 1, s_viewPos);
-    k = glGetUniformLocation(prog, "u_material");
-    glUniform4f(k, intensity*diff / M_PI, intensity*spec * (m+8.0) / (8.0*M_PI), m, intensity*fill / M_PI);
-    k = glGetUniformLocation(prog, "u_fresnel");
-    glUniform3f(k, fr0, 1-fr0, frexp);
-
-    GLfloat shadowPlane[4];
-    vec3Cross(shadowPlane, s_xAxis, s_lightDir);
-    vec3Normalize(shadowPlane, shadowPlane);
-    shadowPlane[3] = vec3Dot(shadowPlane, s_shadowPoint);
-    k = glGetUniformLocation(prog, "u_shadowPlane");
-    glUniform4fv(k, 1, shadowPlane);
-}
-
-static void initUniformsScreen()
-{
-    GLint k;
-    GLuint prog = s_p.screen_prog;
-
-    k = glGetUniformLocation(prog, "u_stretchTex");
-    glUniform1i(k, STRETCH_I);
-    k = glGetUniformLocation(prog, "u_noiseTex");
-    glUniform1i(k, NOISE_I);
-    k = glGetUniformLocation(prog, "u_mvp");
-    glUniformMatrix4fv(k, 1, GL_FALSE, s_p.mvp_mat);
-
-    initShading(prog, 4.0, 0.001, 0.0, 0.065, 41, 0.04, 4);
-
-    s_u._screen_uv_scale_loc = glGetUniformLocation(prog, "u_uvScale");
-    s_u._screen_border_uv_offs_loc = glGetUniformLocation(prog, "u_borderUVOffs");
-    updateUniformsScreen(1);
-}
-
-static void initUniformsTV()
-{
-    GLint k;
-    GLuint prog = s_p.tv_prog;
-
-    k = glGetUniformLocation(prog, "u_downsample1Tex");
-    glUniform1i(k, DOWNSAMPLE1_I);
-    k = glGetUniformLocation(prog, "u_downsample3Tex");
-    glUniform1i(k, DOWNSAMPLE3_I);
-    k = glGetUniformLocation(prog, "u_downsample5Tex");
-    glUniform1i(k, DOWNSAMPLE5_I);
-    k = glGetUniformLocation(prog, "u_noiseTex");
-    glUniform1i(k, NOISE_I);
-
-    k = glGetUniformLocation(prog, "u_mvp");
-    glUniformMatrix4fv(k, 1, GL_FALSE, s_p.mvp_mat);
-
-    initShading(prog, 4.0, 0.0038, 0.0035, 0.039, 49, 0.03, 4);
-
-    updateUniformsTV();
-}
-
-static void initUniformsDownsample()
-{
-    GLint k;
-    GLuint prog = s_p.downsample_prog;
-
-    k = glGetUniformLocation(prog, "u_weights");
-    glUniform1fv(k, 8, s_downsample_ws);
-
-    s_u._downsample_offsets_loc = glGetUniformLocation(prog, "u_offsets");
-    s_u._downsample_downsampleTex_loc = glGetUniformLocation(prog, "u_downsampleTex");
-    updateUniformsDownsample(280, 240, DOWNSAMPLE0_I, 1);
-}
-
-static void initUniformsCombine()
-{
-    GLint k;
-    GLuint prog = s_p.combine_prog;
-
-    k = glGetUniformLocation(prog, "u_tvTex");
-    glUniform1i(k, TV_I);
-    k = glGetUniformLocation(prog, "u_downsample3Tex");
-    glUniform1i(k, DOWNSAMPLE3_I);
-    k = glGetUniformLocation(prog, "u_downsample5Tex");
-    glUniform1i(k, DOWNSAMPLE5_I);
-    k = glGetUniformLocation(prog, "u_noiseTex");
-    glUniform1i(k, NOISE_I);
-
-    s_u._combine_glow_loc = glGetUniformLocation(prog, "u_glow");
 }
 
 static void initUniformsDirect()
@@ -501,46 +303,6 @@ static void passStretch()
     glViewport(0, 0, SCREEN_W, SCREEN_H);
     glUseProgram(s_p.stretch_prog);
     updateUniformsStretch();
-    meshRender(&s_p.quad_mesh);
-}
-
-static void passDownsample()
-{
-    glUseProgram(s_p.downsample_prog);
-
-    for (int i = 0; i < 6; ++i) {
-        glBindFramebuffer(GL_FRAMEBUFFER, s_p.downsample_fb[i]);
-        glViewport(0, 0, s_downsample_widths[i+1], s_downsample_heights[i+1]);
-        updateUniformsDownsample(s_downsample_widths[i], s_downsample_heights[i], TV_I + i, !(i & 1));
-        meshRender(&s_p.quad_mesh);
-    }
-}
-
-static void passScreen()
-{
-    glBindFramebuffer(GL_FRAMEBUFFER, s_p.tv_fb);
-    glViewport(0, 0, SCREEN_W, SCREEN_H);
-    glUseProgram(s_p.screen_prog);
-    updateUniformsScreen(0);
-    meshRender(&s_p.screen_mesh);
-}
-
-static void passTV()
-{
-    glBindFramebuffer(GL_FRAMEBUFFER, s_p.tv_fb);
-    glViewport(0, 0, SCREEN_W, SCREEN_H);
-
-    glUseProgram(s_p.tv_prog);
-    updateUniformsTV();
-    meshRender(&s_p.tv_mesh);
-}
-
-static void passCombine()
-{
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
-    glViewport(s_p.viewport[0], s_p.viewport[1], s_p.viewport[2], s_p.viewport[3]);
-    glUseProgram(s_p.combine_prog);
-    updateUniformsCombine();
     meshRender(&s_p.quad_mesh);
 }
 
@@ -753,84 +515,26 @@ int ES2_Init(const char* canvasQuerySelector, double aspect)
     // Configure RGB framebuffer.
     glActiveTexture(TEX(RGB_I));
     createFBTex(&s_p.rgb_tex, &s_p.rgb_fb, RGB_W, IDX_H, GL_RGB, GL_NEAREST, GL_CLAMP_TO_EDGE);
-    s_p.rgb_prog = buildShaderFile("/data/rgb.vert", "/data/rgb.frag", common_src);
-    s_p.ntsc_prog = buildShaderFile("/data/ntsc.vert", "/data/ntsc.frag", common_src);
+    s_p.rgb_prog = buildShaderFile("/data/rgb.vert", "/data/rgb.frag", ES2_common_shader_src);
+    s_p.ntsc_prog = buildShaderFile("/data/ntsc.vert", "/data/ntsc.frag", ES2_common_shader_src);
     initUniformsRGB();
 
     // Setup sharpen framebuffer.
     glActiveTexture(TEX(SHARPEN_I));
     createFBTex(&s_p.sharpen_tex, &s_p.sharpen_fb, SCREEN_W, IDX_H, GL_RGB, GL_NEAREST, GL_CLAMP_TO_EDGE);
-    s_p.sharpen_prog = buildShaderFile("/data/sharpen.vert", "/data/sharpen.frag", common_src);
+    s_p.sharpen_prog = buildShaderFile("/data/sharpen.vert", "/data/sharpen.frag", ES2_common_shader_src);
     initUniformsSharpen();
 
     // Setup stretch framebuffer.
     glActiveTexture(TEX(STRETCH_I));
     createFBTex(&s_p.stretch_tex, &s_p.stretch_fb, SCREEN_W, SCREEN_H, GL_RGB, GL_LINEAR, GL_CLAMP_TO_EDGE);
-    s_p.stretch_prog = buildShaderFile("/data/stretch.vert", "/data/stretch.frag", common_src);
+    s_p.stretch_prog = buildShaderFile("/data/stretch.vert", "/data/stretch.frag", ES2_common_shader_src);
     initUniformsStretch();
 
-    // Setup screen/TV framebuffer.
-    glActiveTexture(TEX(TV_I));
-    createFBTex(&s_p.tv_tex, &s_p.tv_fb, SCREEN_W, SCREEN_H, GL_RGB, GL_LINEAR, GL_CLAMP_TO_EDGE);
-
-    // Setup downsample framebuffers.
-    for (int i = 0; i < 6; ++i) {
-        glActiveTexture(TEX(DOWNSAMPLE0_I + i));
-        createFBTex(&s_p.downsample_tex[i], &s_p.downsample_fb[i],
-            s_downsample_widths[i+1], s_downsample_heights[i+1],
-            GL_RGB, GL_LINEAR, GL_CLAMP_TO_EDGE);
-    }
-
-    // Setup downsample shader.
-    s_p.downsample_prog = buildShaderFile("/data/downsample.vert", "/data/downsample.frag", common_src);
-    initUniformsDownsample();
-
-    // Setup screen shader.
-    s_p.screen_prog = buildShaderFile("/data/screen.vert", "/data/screen.frag", common_src);
-    createMesh(&s_p.screen_mesh, mesh_screen_vert_num, ARRAY_SIZE(mesh_screen_varrays), mesh_screen_varrays, 3*mesh_screen_face_num, mesh_screen_faces);
-    initUniformsScreen();
-
-    // Setup TV shader.
-    s_p.tv_prog = buildShaderFile("/data/tv.vert", "/data/tv.frag", common_src);
-    int num_edges = 0;
-    int *edges = createUniqueEdges(&num_edges, mesh_screen_vert_num, 3*mesh_screen_face_num, mesh_screen_faces);
-    num_edges *= 2;
-
-    GLfloat *rim_extra = (GLfloat*) malloc(3*sizeof(GLfloat) * mesh_rim_vert_num);
-    for (int i = 0; i < mesh_rim_vert_num; ++i) {
-        GLfloat p[3];
-        vec3Set(p, &mesh_rim_verts[3*i]);
-        GLfloat shortest[3] = { 0, 0, 0 };
-        double shortestDist = 1000000;
-        for (int j = 0; j < num_edges; j += 2) {
-            int ai = 3*edges[j];
-            int bi = 3*edges[j+1];
-            GLfloat diff[3];
-            vec3ClosestOnSegment(diff, p, &mesh_screen_verts[ai], &mesh_screen_verts[bi]);
-            vec3Sub(diff, diff, p);
-            double dist = vec3Length2(diff);
-            if (dist < shortestDist) {
-                shortestDist = dist;
-                vec3Set(shortest, diff);
-            }
-        }
-        // TODO: Could interpolate uv with vert normal here, and not in vertex shader?
-        rim_extra[3*i] = shortest[0];
-        rim_extra[3*i+1] = shortest[1];
-        rim_extra[3*i+2] = shortest[2];
-    }
-    mesh_rim_varrays[2].data = rim_extra;
-    createMesh(&s_p.tv_mesh, mesh_rim_vert_num, ARRAY_SIZE(mesh_rim_varrays), mesh_rim_varrays, 3*mesh_rim_face_num, mesh_rim_faces);
-    free(edges);
-    free(rim_extra);
-    initUniformsTV();
-
-    // Setup combine shader.
-    s_p.combine_prog = buildShaderFile("/data/combine.vert", "/data/combine.frag", common_src);
-    initUniformsCombine();
+    ES2_TVInit();
 
     // Setup direct shader.
-    s_p.direct_prog = buildShaderFile("/data/direct.vert", "/data/direct.frag", common_src);
+    s_p.direct_prog = buildShaderFile("/data/direct.vert", "/data/direct.frag", ES2_common_shader_src);
     initUniformsDirect();
 
     return 1;
@@ -844,8 +548,7 @@ void ES2_SetViewport(int width, int height)
 
 void ES2_VideoChanged()
 {
-    glUseProgram(s_p.screen_prog);
-    updateUniformsScreen(1);
+    ES2_TVVideoChanged();
 
     glUseProgram(s_p.direct_prog);
     updateUniformsDirect(1);
@@ -875,10 +578,7 @@ void ES2_Render(uint8 *pixels, uint8 *row_deemp, uint8 overscan_color)
     passSharpen();
     passStretch();
     if (em_video_tv) {
-        passScreen();
-        passDownsample();
-        passTV();
-        passCombine();
+        ES2_TVRender();
     } else {
         passDirect();
     }
