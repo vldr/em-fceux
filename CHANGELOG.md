@@ -1,5 +1,12 @@
 # Changelog for em-fceux
 
+## [1.0.2] - 2020-04-26
+
+### Fixed
+
+- iOS 13 rendering (reduce active texture units to 7).
+- iOS 13 audio playback.
+
 ## [1.0.1] - 2020-03-15
 
 ### Added
