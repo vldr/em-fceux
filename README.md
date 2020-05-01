@@ -10,11 +10,12 @@ Try it at https://tsone.kapsi.fi/em-fceux/.
 
 ## Overview
 
-em-fceux enables the FCEUX emulator core feators on web browsers. The emulation
-runs at 60 FPS on modern computers, has low input latency and good audio
-quality. It also supports save states and battery-backed save RAM.
+em-fceux enables the core features of the FCEUX emulator on the web browsers.
+The emulation runs at 60 FPS on modern computers, has low input latency and good
+audio quality. It also supports save states and battery-backed save RAM.
 
-Additionally it has a new custom NTSC video signal and CRT TV emulation modes.
+It also incorporates a new shader-based NTSC composite video emulation
+technique.
 
 ## Features
 
@@ -79,13 +80,13 @@ are embedded in the output binary.
 - [WebGL](https://www.khronos.org/webgl/).
 - [Web Audio API](https://www.w3.org/TR/webaudio/).
 
-## NTSC video signal and CRT TV Emulation Details
+## NTSC Composite Video Emulation Details
 
-The NTSC signal emulation models the composite YIQ output. Separation of YIQ
-luminance (Y) and chrominance (IQ/UV) is done with a "1D comb filter" technique
-which reduces chroma fringing compared to band/low-pass filtering. Under the
-hood, YIQ to RGB conversion relies on a large lookup texture which is referenced
-in a fragment shader.
+The NTSC composite video emulation emulates a signal path of an early 1990s TV.
+The separation to luminance (Y) and chroma (IQ) uses a
+[two-line comb filter](http://www.cockam.com/vidcomb.htm#TwoLine) to reduce
+chroma fringing. Conversion of the separated YIQ to RGB uses a large lookup
+texture in the fragment shader.
 
 ## Contact
 
@@ -98,5 +99,5 @@ Please submit bugs and feature requests in the
 
 Licensed under [GNU GPL 2](https://www.gnu.org/licenses/gpl-2.0.txt).
 
-This port if base on
+em-fceux is based on
 [FCEUX 2.2.2 source code release](http://sourceforge.net/projects/fceultra/files/Source%20Code/2.2.2%20src/fceux-2.2.2.src.tar.gz/download).
