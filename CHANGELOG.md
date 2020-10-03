@@ -4,7 +4,7 @@
 
 ### Changed
 
-- Upgraded to emscripten 2.0.6 (bump major version due API change).
+- Upgraded to emscripten 2.0.6 (caused major version bump).
 
 ## [1.0.2] - 2020-04-26
 

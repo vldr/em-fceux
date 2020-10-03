@@ -46,9 +46,15 @@ New features:
 - NTSC composite video emulation.
 - CRT TV emulation.
 
-## API
+## Examples and API
 
-See [API.md](https://bitbucket.org/tsone/em-fceux/src/master/API.md).
+For basic usage, see
+[em-fceux-example-minimal](https://bitbucket.org/tsone/em-fceux-example-minimal/).
+For advanced usage (a full web emulator), see
+[em-fceux-site](https://bitbucket.org/tsone/em-fceux-site/).
+
+API documentation can be found in
+[API.md](https://bitbucket.org/tsone/em-fceux/src/master/API.md).
 
 ## Build
 
