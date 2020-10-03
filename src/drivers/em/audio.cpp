@@ -126,8 +126,8 @@ static void SilenceBuffer()
     });
 }
 
-// Callback for filling HW audio buffer.
-static void AudioCallback()
+// Callback for filling HW audio buffer, exposed to js.
+extern "C" void audioBufferCallback()
 {
     if (!EmulationPaused && !s_muted) {
         CopyBuffer();
@@ -161,12 +161,12 @@ static int ContextInit()
         source.connect(processor); // For iOS/iPadOS 13 Safari, processor requires a source.
         processor.onaudioprocess = function(ev) {
             Module.currentOutputBuffer = ev.outputBuffer;
-            Module.dynCall_v($1);
+            Module._audioBufferCallback();
         };
         processor.connect(context.destination);
 
         return context.sampleRate;
-    }, AUDIO_HW_BUF_MAX, AudioCallback);
+    }, AUDIO_HW_BUF_MAX);
 }
 
 bool Audio_IsInitialized()

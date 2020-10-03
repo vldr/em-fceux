@@ -22,7 +22,7 @@ interface SaveFiles {
   [filename: string]: Uint8Array;
 }
 
-export default function FCEUX(params?): FceuxModule;
+export default function FCEUX(params?): Promise<FceuxModule>;
 
 export class FceuxModule {
   // em.cpp

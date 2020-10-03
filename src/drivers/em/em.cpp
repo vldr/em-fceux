@@ -451,9 +451,9 @@ EMSCRIPTEN_BINDINGS(fceux)
     emscripten::function("setConfig", &SetConfig);
 
     // For internal use.
-    emscripten::function("loadGameSave", &System_LoadGameSave);
-    emscripten::function("saveGameSave", &System_SaveGameSave);
-    emscripten::function("startGame", &System_StartGame);
+    emscripten::function("_loadGameSave", &System_LoadGameSave);
+    emscripten::function("_saveGameSave", &System_SaveGameSave);
+    emscripten::function("_startGame", &System_StartGame);
 }
 
 // NOTE: Following are non-implemented "dummy" driver functions.

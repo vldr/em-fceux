@@ -1,5 +1,11 @@
 # Changelog for em-fceux
 
+## [2.0.0] - 2020-10-03
+
+### Changed
+
+- Upgraded to emscripten 2.0.6 (bump major version due API change).
+
 ## [1.0.2] - 2020-04-26
 
 ### Fixed

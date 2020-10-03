@@ -456,7 +456,8 @@ static int ES2_CreateWebGLContext(const char* canvasQuerySelector)
     EmscriptenWebGLContextAttributes attr;
     emscripten_webgl_init_context_attributes(&attr);
     attr.alpha = attr.antialias = attr.premultipliedAlpha = 0;
-    attr.depth = attr.stencil = attr.preserveDrawingBuffer = attr.preferLowPowerToHighPerformance = attr.failIfMajorPerformanceCaveat = 0;
+    attr.depth = attr.stencil = attr.preserveDrawingBuffer  = attr.failIfMajorPerformanceCaveat = 0;
+    attr.powerPreference = EM_WEBGL_POWER_PREFERENCE_LOW_POWER;
     attr.enableExtensionsByDefault = 0;
     attr.majorVersion = 1;
     attr.minorVersion = 0;

@@ -21,7 +21,7 @@
     FS.mount(MEMFS, {}, dir);
   };
   Module.exportSaveFiles = function() {
-    Module.saveGameSave();
+    Module._saveGameSave();
     const dir = '/tmp/sav/';
     const result = {};
     for (let name of FS.readdir(dir)) {
@@ -37,7 +37,7 @@
     for (let name in states) {
       FS.writeFile(dir + name, states[name]);
     }
-    Module.loadGameSave();
+    Module._loadGameSave();
   };
 
   Module.eventListeners = {};
@@ -54,7 +54,7 @@
 
   Module.loadGame = function(uint8Array) {
     FS.writeFile('/tmp/rom', uint8Array);
-    Module.startGame();
+    Module._startGame();
   };
   Module.downloadGame = function(url, init) {
     fetch(url, init).then(response => {

@@ -54,10 +54,10 @@ See [API.md](https://bitbucket.org/tsone/em-fceux/src/master/API.md).
 
 Setup:
 
-1. [Install and activate Emscripten 1.39.4 (upstream)](https://emscripten.org/docs/getting_started/downloads.html).
+1. [Install and activate Emscripten 2.0.6](https://emscripten.org/docs/getting_started/downloads.html).
 2. Have python 2.7.x.
 3. Install [scons](https://scons.org/pages/download.html).
-4. Run `source emsdk_env.sh` to setup Emscripten env.
+4. Run `source emsdk_env.sh` to setup the Emscripten env.
    - Note, this also sets `npm` to env.
 5. Run `npm install`.
 

@@ -57,14 +57,14 @@ if 'EMSCRIPTEN_TOOL_PATH' in os.environ:
   env['NOCHEAT'] = 1
   env.Tool('emscripten', toolpath=[os.environ['EMSCRIPTEN_TOOL_PATH']])
   env.Replace(PROGSUFFIX = [".js"])
-  common = ''
-  common += ' -s STRICT=1 -fno-exceptions -fno-rtti'
+  common = '-s STRICT=1 -fno-exceptions -fno-rtti -fno-c++-static-destructors -s DISABLE_EXCEPTION_CATCHING=1'
   common += ' --bind -DEMSCRIPTEN_HAS_UNBOUND_TYPE_NAMES=0'
-  common += ' -Wno-c++11-narrowing -Wno-deprecated-register'
   common += ' -s MODULARIZE=1 -s EXPORT_NAME=FCEUX -s INVOKE_RUN=0 --post-js src/drivers/em/post.js'
-  common += ' -s EXTRA_EXPORTED_RUNTIME_METHODS=\'["FS"]\''
+  common += ' -s USE_SDL=0 -s USE_SDL_IMAGE=0 -s USE_SDL_TTF=0 -s USE_SDL_NET=0 -s USE_SDL_MIXER=0'
+  common += ' -s GL_EMULATE_GLES_VERSION_STRING_FORMAT=0 -s GL_EXTENSIONS_IN_PREFIXED_FORMAT=0 -s GL_SUPPORT_AUTOMATIC_ENABLE_EXTENSIONS=0 -s GL_SUPPORT_SIMPLE_ENABLE_EXTENSIONS=0'
+  common += ' -s EXPORTED_FUNCTIONS=\'["_audioBufferCallback"]\''
   env.Append(CCFLAGS = common, LINKFLAGS = common)
-  env.Append(LINKFLAGS = '--embed-file src/drivers/em/assets/data/@/data/')
+  env.Append(LINKFLAGS = '--no-entry --embed-file src/drivers/em/assets/data/@/data/')
 else:
   env['EMSCRIPTEN'] = 0
 
@@ -78,7 +78,7 @@ if platform.system == "ppc":
 env['LIBS'] = []
 
 # Default compiler flags:
-env.Append(CCFLAGS = ['-Wall', '-Werror', '-Wno-write-strings', '-Wno-sign-compare', '-Wno-unused-local-typedefs'])
+env.Append(CCFLAGS = ['-Wall', '-Werror', '-Wno-write-strings', '-Wno-sign-compare', '-Wno-unused-local-typedefs', '-Wno-misleading-indentation', '-Wno-deprecated-register', '-Wno-c++11-narrowing'])
 
 if 'PLATFORM' in os.environ:
   env.Replace(PLATFORM = os.environ['PLATFORM'])
@@ -224,9 +224,7 @@ print("base CCFLAGS:",env['CCFLAGS'])
 
 if env['DEBUG']:
   if env['EMSCRIPTEN']:
-    common = ''
-    common += ' -O0 -g'
-    common += ' -s ASSERTIONS=2 -s SAFE_HEAP=1'
+    common = '-O0 -g -s ASSERTIONS=2 -s SAFE_HEAP=1'
     common += ' -s DEMANGLE_SUPPORT=1'
     env.Append(CPPDEFINES=["_DEBUG"], CCFLAGS = common, LINKFLAGS = common)
   else:
@@ -234,10 +232,8 @@ if env['DEBUG']:
 
 if env['RELEASE']:
   if env['EMSCRIPTEN']:
-    common = ''
-    common += ' -O3 --llvm-lto 3'
-    common += ' -s AGGRESSIVE_VARIABLE_ELIMINATION=1'
-    common += ' -s ASSERTIONS=0'
+    common = '-Os -flto=full -s ASSERTIONS=0'
+    common += ' -s GL_TRACK_ERRORS=0'
     env.Append(CCFLAGS = common)
     env.Append(LINKFLAGS = common)
     env.Append(LINKFLAGS = '-strip-all')
