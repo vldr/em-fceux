@@ -1,5 +1,11 @@
 # Changelog for em-fceux
 
+## [2.0.1] - 2020-10-09
+
+### Fixed
+
+- Missing main in package.json for nodejs.
+
 ## [2.0.0] - 2020-10-03
 
 ### Changed

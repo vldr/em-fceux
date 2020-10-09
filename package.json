@@ -34,6 +34,7 @@
     "package.json",
     "README.md"
   ],
+  "main": "./dist/fceux.js",
   "scripts": {
     "build": "./build-emscripten.sh && npm run build:docs",
     "build:debug": "./build-emscripten.sh RELEASE=0 && npm run build:docs",
