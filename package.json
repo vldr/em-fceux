@@ -1,6 +1,6 @@
 {
   "name": "em-fceux",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "Emscripten port of FCEUX emulator.",
   "homepage": "https://tsone.kapsi.fi/em-fceux/",
   "author": "Valtteri Heikkilä",

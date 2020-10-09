@@ -42,7 +42,7 @@
 #ifndef __EMSCRIPTEN__
 #define FCEU_FEATURE_STRING ""
 #else
-#define FCEU_FEATURE_STRING " (em-fceux 2.0.0) Powered by Emscripten"
+#define FCEU_FEATURE_STRING " (em-fceux 2.0.1) Powered by Emscripten"
 #endif
 
 #ifdef _DEBUG
