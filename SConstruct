@@ -78,7 +78,7 @@ if platform.system == "ppc":
 env['LIBS'] = []
 
 # Default compiler flags:
-env.Append(CCFLAGS = ['-Wall', '-Werror', '-Wno-write-strings', '-Wno-sign-compare', '-Wno-unused-local-typedefs', '-Wno-misleading-indentation', '-Wno-deprecated-register', '-Wno-c++11-narrowing'])
+env.Append(CCFLAGS = ['-Wall', '-Wno-write-strings', '-Wno-sign-compare', '-Wno-unused-local-typedefs', '-Wno-misleading-indentation', '-Wno-deprecated-register', '-Wno-c++11-narrowing'])
 
 if 'PLATFORM' in os.environ:
   env.Replace(PLATFORM = os.environ['PLATFORM'])
@@ -195,7 +195,7 @@ else:
       Exit(1)
   # "--as-needed" no longer available on OSX (probably BSD as well? TODO: test)
   if env['PLATFORM'] != 'darwin':
-    env.Append(LINKFLAGS=['-Wl,--as-needed'])
+    env.Append(LINKFLAGS=['-Wl'])
 
   ### Search for gd if we're not in Windows
   if env['PLATFORM'] != 'win32' and env['PLATFORM'] != 'cygwin' and env['CREATE_AVI'] and env['LOGO']:

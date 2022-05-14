@@ -24,6 +24,9 @@ enum ENUM_SSLOADPARAMS
 	SSLOADPARAM_BACKUP,
 };
 
+void save_please(int index);
+void load_please(int index);
+
 void FCEUSS_Save(const char *, bool display_message=true);
 bool FCEUSS_Load(const char *, bool display_message=true);
 

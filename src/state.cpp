@@ -296,8 +296,8 @@ static bool ReadStateChunks(EMUFILE* is, int32 totalsize)
 			}
 			break;
 		case 0x10:
-			if(!ReadStateChunk(is,SFMDATA,size)) 
-				ret=false; 
+			if(!ReadStateChunk(is,SFMDATA,size))
+				ret=false;
 			break;
 
 			// now it gets hackier:
@@ -381,6 +381,60 @@ static bool ReadStateChunks(EMUFILE* is, int32 totalsize)
 int CurrentState=0;
 extern int geniestage;
 
+const int MAX_SAVES = 32;
+uint8_t save[MAX_SAVES][4656];
+
+void save_please(int index)
+{
+	SFORMAT* sformat_list[7] = { SFCPU, SFCPUC, FCEUPPU_STATEINFO, FCEU_NEWPPU_STATEINFO, FCEUCTRL_STATEINFO, FCEUSND_STATEINFO, NULL };
+	uint32_t offset = 0;
+
+	for (int i = 0; sformat_list[i] != NULL; i++)
+	{
+		SFORMAT* sformat = sformat_list[i];
+
+		for (int i = 0; sformat[i].v != NULL; i++)
+		{
+			if (sformat[i].s & FCEUSTATE_INDIRECT)
+			{
+				memcpy(save[index] + offset, *(void**)sformat[i].v, sformat[i].s & (~FCEUSTATE_FLAGS));
+
+			}
+			else
+			{
+				memcpy(save[index] + offset, sformat[i].v, sformat[i].s & (~FCEUSTATE_FLAGS));
+			}
+
+			offset += sformat[i].s & (~FCEUSTATE_FLAGS);
+		}
+	}
+}
+
+void load_please(int index)
+{
+	SFORMAT* sformat_list[7] = { SFCPU, SFCPUC, FCEUPPU_STATEINFO, FCEU_NEWPPU_STATEINFO, FCEUCTRL_STATEINFO, FCEUSND_STATEINFO, NULL };
+	uint32_t offset = 0;
+
+	for (int i = 0; sformat_list[i] != NULL; i++)
+	{
+		SFORMAT* sformat = sformat_list[i];
+
+		for (int i = 0; sformat[i].v != NULL; i++)
+		{
+			if (sformat[i].s & FCEUSTATE_INDIRECT)
+			{
+				memcpy(*(void**)sformat[i].v, save[index] + offset, sformat[i].s & (~FCEUSTATE_FLAGS));
+			}
+			else
+			{
+				memcpy(sformat[i].v, save[index] + offset, sformat[i].s & (~FCEUSTATE_FLAGS));
+
+			}
+
+			offset += sformat[i].s & (~FCEUSTATE_FLAGS);
+		}
+	}
+}
 
 bool FCEUSS_SaveMS(EMUFILE* outstream, int compressionLevel)
 {
@@ -1005,7 +1059,7 @@ void FCEUI_LoadState(const char *fname, bool display_message)
 	{
 #ifndef __EMSCRIPTEN__
 		//mbg todo netplay
-#if 0 
+#if 0
 		if(FCEUnetplay)
 		{
 			char *fn = strdup(FCEU_MakeFName(FCEUMKF_NPTEMP, 0, 0).c_str());

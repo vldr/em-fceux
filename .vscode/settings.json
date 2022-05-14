@@ -10,5 +10,8 @@
     "C_Cpp.default.includePath": [
         "~/emsdk/upstream/emscripten/system/include",
         "${default}"
-    ]
+    ],
+    "files.associations": {
+        "random": "cpp"
+    }
 }

@@ -22,6 +22,7 @@
 #include "../../version.h"
 #include <emscripten.h>
 #include <emscripten/bind.h>
+#include "../../state.h"
 
 
 // Number of frames to skip per regular frame when frameskipping.
@@ -125,7 +126,7 @@ static void EmulateFrame(int frameskipmode)
     Audio_Write(sound, ssize);
 }
 
-static int DoFrame()
+static int DoFrame(int skip)
 {
     if (em_throttling) {
         for (int i = 0; i < THROTTLE_FRAMESKIPS; ++i) {
@@ -152,7 +153,7 @@ static int DoFrame()
         }
     }
 
-    EmulateFrame(0);
+    EmulateFrame(skip);
     return 1;
 }
 
@@ -283,7 +284,7 @@ static void UpdateZapper()
 static void System_Update()
 {
     if (GameInfo) {
-        if (!DoFrame()) {
+        if (!DoFrame(0)) {
             return; // Frame was not processed, skip rest of this callback.
         } else {
             Video_Render(0);
@@ -293,7 +294,17 @@ static void System_Update()
     }
 
     UpdateFrameAdvance();
-    UpdateZapper();
+}
+
+static void System_UpdateSkip()
+{
+    if (GameInfo) {
+        if (!DoFrame(2)) {
+            return; // Frame was not processed, skip rest of this callback.
+        }
+    }
+
+    UpdateFrameAdvance();
 }
 
 static bool System_SetConfig(const std::string& key, const emscripten::val& value)
@@ -395,17 +406,17 @@ static void System_SetState(int index)
     FCEUI_SelectState(index, 1);
 }
 
-static void System_LoadState()
+static void System_LoadState(int index)
 {
     if (GameInfo && GameInfo->type != GIT_NSF) {
-        FCEUI_LoadState(NULL);
+        load_please(index);
     }
 }
 
-static void System_SaveState()
+static void System_SaveState(int index)
 {
     if (GameInfo && GameInfo->type != GIT_NSF) {
-        FCEUI_SaveState(NULL);
+        save_please(index);
     }
 }
 
@@ -424,6 +435,7 @@ EMSCRIPTEN_BINDINGS(fceux)
 {
     emscripten::function("init", &System_Init);
     emscripten::function("update", &System_Update);
+    emscripten::function("updateSkip", &System_UpdateSkip);
 
     emscripten::function("gameMd5", &System_GameMd5);
 

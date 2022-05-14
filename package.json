@@ -36,8 +36,8 @@
   ],
   "main": "./dist/fceux.js",
   "scripts": {
-    "build": "./build-emscripten.sh && npm run build:docs",
-    "build:debug": "./build-emscripten.sh RELEASE=0 && npm run build:docs",
+    "build": "./build-emscripten.sh",
+    "build:debug": "./build-emscripten.sh RELEASE=0",
     "build:docs": "./generate-api-doc.py > API.md && npm run prettier",
     "build:shaders": "./build-shaders.sh",
     "clean": "./build-emscripten.sh --clean ; rm -rf dist ; find . -name '*.o' -delete",
