@@ -38,7 +38,6 @@ static bool em_throttling = false;
 static bool em_frame_advance = false;
 int em_scanlines = 224; // Default is NTSC, 224.
 
-static uint32 em_controller_bits = 0;
 static uint32 em_zapper[3] = {};
 static int em_zapper_hold_counter = 0;
 

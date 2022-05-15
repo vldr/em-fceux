@@ -24,7 +24,8 @@ enum ENUM_SSLOADPARAMS
 	SSLOADPARAM_BACKUP,
 };
 
-extern int frameCount;
+extern uint32_t frameCount;
+extern uint32_t em_controller_bits;
 
 void save_please(int index);
 void load_please(int index);

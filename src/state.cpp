@@ -109,7 +109,8 @@ static int SFEXINDEX;
 #define RLSB 		FCEUSTATE_RLSB	//0x80000000
 
 
-int frameCount = 0;
+uint32_t frameCount = 0;
+uint32_t em_controller_bits = 0;
 
 extern SFORMAT FCEUPPU_STATEINFO[];
 extern SFORMAT FCEU_NEWPPU_STATEINFO[];
@@ -129,6 +130,7 @@ SFORMAT SFCPU[]={
 	{ &X.DB, 1, "DB"},
 	{ &RAM, 0x800 | FCEUSTATE_INDIRECT, "RAM", },
 	{ &frameCount, sizeof(frameCount), "FRAMECOUNT" },
+	{ &em_controller_bits, sizeof(em_controller_bits), "CONTBITS" },
 	{ 0 }
 };
 
@@ -385,12 +387,15 @@ int CurrentState=0;
 extern int geniestage;
 
 const int MAX_SAVES = 32;
-uint8_t save[MAX_SAVES][4660];
+uint8_t save[MAX_SAVES][4668];
 
 void save_please(int index)
 {
-	SFORMAT* sformat_list[7] = { SFCPU, SFCPUC, FCEUPPU_STATEINFO, FCEU_NEWPPU_STATEINFO, FCEUCTRL_STATEINFO, FCEUSND_STATEINFO, NULL };
+	SFORMAT* sformat_list[8] = { SFCPU, SFCPUC, FCEUPPU_STATEINFO, FCEU_NEWPPU_STATEINFO, FCEUCTRL_STATEINFO, FCEUSND_STATEINFO, FCEUMOV_STATEINFO, NULL };
 	uint32_t offset = 0;
+
+	FCEUPPU_SaveState();
+	FCEUSND_SaveState();
 
 	for (int i = 0; sformat_list[i] != NULL; i++)
 	{
@@ -415,7 +420,7 @@ void save_please(int index)
 
 void load_please(int index)
 {
-	SFORMAT* sformat_list[7] = { SFCPU, SFCPUC, FCEUPPU_STATEINFO, FCEU_NEWPPU_STATEINFO, FCEUCTRL_STATEINFO, FCEUSND_STATEINFO, NULL };
+	SFORMAT* sformat_list[8] = { SFCPU, SFCPUC, FCEUPPU_STATEINFO, FCEU_NEWPPU_STATEINFO, FCEUCTRL_STATEINFO, FCEUSND_STATEINFO, FCEUMOV_STATEINFO, NULL };
 	uint32_t offset = 0;
 
 	for (int i = 0; sformat_list[i] != NULL; i++)
@@ -437,6 +442,9 @@ void load_please(int index)
 			offset += sformat[i].s & (~FCEUSTATE_FLAGS);
 		}
 	}
+
+	FCEUPPU_LoadState(0);
+	FCEUSND_LoadState(0);
 }
 
 bool FCEUSS_SaveMS(EMUFILE* outstream, int compressionLevel)
