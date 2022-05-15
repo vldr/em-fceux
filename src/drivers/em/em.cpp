@@ -122,36 +122,38 @@ static void EmulateFrame(int frameskipmode)
     int32 *sound;
     int32 ssize;
 
+    frameCount++;
+
     FCEUI_Emulate(&gfx, &sound, &ssize, frameskipmode);
     Audio_Write(sound, ssize);
 }
 
 static int DoFrame(int skip)
 {
-    if (em_throttling) {
-        for (int i = 0; i < THROTTLE_FRAMESKIPS; ++i) {
-            EmulateFrame(2);
-        }
-    }
+    // if (em_throttling) {
+    //     for (int i = 0; i < THROTTLE_FRAMESKIPS; ++i) {
+    //         EmulateFrame(2);
+    //     }
+    // }
 
     // Get the number of frames to fill the audio buffer.
     int frames = (AUDIO_BUF_MAX - Audio_GetBufferCount()) / em_audio_frame_samples;
 
     // It's possible audio to go ahead of visuals. If so, skip all emulation for this frame.
     // NOTE: This is not a good solution as it may cause unnecessary skipping in emulation.
-    if (Audio_IsInitialized() && frames <= 0) {
-        return 0;
-    }
+    // if (Audio_IsInitialized() && frames <= 0) {
+    //     return 0;
+    // }
 
     // Skip frames (video) to fill the audio buffer. Leave two frames free for next requestAnimationFrame in case they come too frequently.
-    if (Audio_IsInitialized() && (frames > 3)) {
-        // Skip only even numbers of frames to correctly display flickering sprites.
-        frames = (frames - 3) & (~1);
-        while (frames > 0) {
-            EmulateFrame(1);
-            --frames;
-        }
-    }
+    // if (Audio_IsInitialized() && (frames > 3)) {
+    //     // Skip only even numbers of frames to correctly display flickering sprites.
+    //     frames = (frames - 3) & (~1);
+    //     while (frames > 0) {
+    //         EmulateFrame(1);
+    //         --frames;
+    //     }
+    // }
 
     EmulateFrame(skip);
     return 1;
@@ -419,6 +421,12 @@ static void System_SaveState(int index)
     }
 }
 
+static uint32_t System_Frame()
+{
+    return frameCount;
+}
+
+
 // Bindings
 
 static bool SetConfig(const std::string& key, const emscripten::val& value)
@@ -435,6 +443,7 @@ EMSCRIPTEN_BINDINGS(fceux)
     emscripten::function("init", &System_Init);
     emscripten::function("update", &System_Update);
     emscripten::function("updateSkip", &System_UpdateSkip);
+    emscripten::function("frame", &System_Frame);
 
     emscripten::function("gameMd5", &System_GameMd5);
 

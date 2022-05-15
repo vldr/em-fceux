@@ -109,6 +109,8 @@ static int SFEXINDEX;
 #define RLSB 		FCEUSTATE_RLSB	//0x80000000
 
 
+int frameCount = 0;
+
 extern SFORMAT FCEUPPU_STATEINFO[];
 extern SFORMAT FCEU_NEWPPU_STATEINFO[];
 extern SFORMAT FCEUSND_STATEINFO[];
@@ -126,6 +128,7 @@ SFORMAT SFCPU[]={
 	{ &X.P, 1, "P\0\0"},
 	{ &X.DB, 1, "DB"},
 	{ &RAM, 0x800 | FCEUSTATE_INDIRECT, "RAM", },
+	{ &frameCount, sizeof(frameCount), "FRAMECOUNT" },
 	{ 0 }
 };
 
@@ -382,7 +385,7 @@ int CurrentState=0;
 extern int geniestage;
 
 const int MAX_SAVES = 32;
-uint8_t save[MAX_SAVES][4656];
+uint8_t save[MAX_SAVES][4660];
 
 void save_please(int index)
 {
