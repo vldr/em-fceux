@@ -124,7 +124,7 @@ static void EmulateFrame(int frameskipmode)
     frameCount++;
 
     FCEUI_Emulate(&gfx, &sound, &ssize, frameskipmode);
-    Audio_Write(sound, ssize);
+    //Audio_Write(sound, ssize);
 }
 
 static int DoFrame(int skip)
@@ -136,7 +136,7 @@ static int DoFrame(int skip)
     // }
 
     // Get the number of frames to fill the audio buffer.
-    int frames = (AUDIO_BUF_MAX - Audio_GetBufferCount()) / em_audio_frame_samples;
+    // int frames = (AUDIO_BUF_MAX - Audio_GetBufferCount()) / em_audio_frame_samples;
 
     // It's possible audio to go ahead of visuals. If so, skip all emulation for this frame.
     // NOTE: This is not a good solution as it may cause unnecessary skipping in emulation.
