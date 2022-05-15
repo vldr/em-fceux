@@ -193,16 +193,9 @@ static void SetPort(int port, const std::string& deviceName)
     uint32 *ptr;
     ESI peri;
 
-    if (deviceName == "controller") {
-        peri = SI_GAMEPAD;
-        ptr = &em_controller_bits;
-    } else if (deviceName == "zapper") {
-        peri = SI_ZAPPER;
-        ptr = em_zapper;
-    } else {
-        FCEU_PrintError("Invalid device name: '%s'", deviceName.c_str());
-        return;
-    }
+
+    peri = SI_GAMEPAD;
+    ptr = &em_controller_bits;
 
     FCEUI_SetInput(port, peri, ptr, 0);
 }
@@ -230,6 +223,7 @@ static bool System_Init(const std::string& canvasQuerySelector)
     FCEUI_SetRenderedLines(start + 8, end - 8, start, end);
 
     SetPort(0, "controller");
+    SetPort(1, "controller");
 
     // TODO: Use the new PPU? Last time tried it didn't work...
     newppu = 0;
@@ -362,6 +356,11 @@ static void System_SetControllerBits(uint32_t bits)
     em_controller_bits = bits;
 }
 
+static uint32_t System_GetControllerBits()
+{
+    return em_controller_bits;
+}
+
 static void System_TriggerZapper(int x, int y)
 {
     em_zapper[0] = x;
@@ -442,6 +441,7 @@ EMSCRIPTEN_BINDINGS(fceux)
     emscripten::function("reset", &System_Reset);
 
     emscripten::function("setControllerBits", &System_SetControllerBits);
+    emscripten::function("getControllerBits", &System_GetControllerBits);
 
     emscripten::function("triggerZapper", &System_TriggerZapper);
 
