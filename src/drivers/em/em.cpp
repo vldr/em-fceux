@@ -115,7 +115,7 @@ static int CloseGame()
     return 1;
 }
 
-static void EmulateFrame(int frameskipmode)
+static void EmulateFrame(int skip)
 {
     uint8 *gfx = 0;
     int32 *sound;
@@ -123,38 +123,19 @@ static void EmulateFrame(int frameskipmode)
 
     frameCount++;
 
-    FCEUI_Emulate(&gfx, &sound, &ssize, frameskipmode);
-    //Audio_Write(sound, ssize);
+    FCEUI_Emulate(&gfx, &sound, &ssize, 0);
+
+    if (skip == 0)
+    {
+        Audio_Write(sound, ssize);
+    }
 }
 
-static int DoFrame(int skip)
+static int DoFrame(bool skip)
 {
-    // if (em_throttling) {
-    //     for (int i = 0; i < THROTTLE_FRAMESKIPS; ++i) {
-    //         EmulateFrame(2);
-    //     }
-    // }
-
-    // Get the number of frames to fill the audio buffer.
-    // int frames = (AUDIO_BUF_MAX - Audio_GetBufferCount()) / em_audio_frame_samples;
-
-    // It's possible audio to go ahead of visuals. If so, skip all emulation for this frame.
-    // NOTE: This is not a good solution as it may cause unnecessary skipping in emulation.
-    // if (Audio_IsInitialized() && frames <= 0) {
-    //     return 0;
-    // }
-
-    // Skip frames (video) to fill the audio buffer. Leave two frames free for next requestAnimationFrame in case they come too frequently.
-    // if (Audio_IsInitialized() && (frames > 3)) {
-    //     // Skip only even numbers of frames to correctly display flickering sprites.
-    //     frames = (frames - 3) & (~1);
-    //     while (frames > 0) {
-    //         EmulateFrame(1);
-    //         --frames;
-    //     }
-    // }
-
+    Audio_IsInitialized();
     EmulateFrame(skip);
+
     return 1;
 }
 
@@ -294,9 +275,13 @@ static void System_Update()
 static void System_UpdateSkip()
 {
     if (GameInfo) {
-        if (!DoFrame(2)) {
-            return; // Frame was not processed, skip rest of this callback.
+        if (!DoFrame(1)) {
+            return;
+        } else {
+            Video_Render(0);
         }
+    } else {
+        Video_Render(1);
     }
 
     UpdateFrameAdvance();
@@ -339,6 +324,8 @@ static bool System_LoadGame(const std::string &path)
 
 static bool System_StartGame()
 {
+    frameCount = 0;
+
     return System_LoadGame("/tmp/rom");
 }
 

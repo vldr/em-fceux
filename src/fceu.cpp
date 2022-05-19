@@ -660,120 +660,120 @@ void FCEUI_Emulate(uint8 **pXBuf, int32 **SoundBuf, int32 *SoundBufSize, int ski
 	//skip initiates frame skip if 1, or frame skip and sound skip if 2
 	int r, ssize;
 
-	// JustFrameAdvanced = false;
+	JustFrameAdvanced = false;
 
-	// if (frameAdvanceRequested)
-	// {
-	// 	if (frameAdvance_Delay_count == 0 || frameAdvance_Delay_count >= frameAdvance_Delay)
-	// 		EmulationPaused = EMULATIONPAUSED_FA;
-	// 	if (frameAdvance_Delay_count < frameAdvance_Delay)
-	// 		frameAdvance_Delay_count++;
-	// }
+	if (frameAdvanceRequested)
+	{
+		if (frameAdvance_Delay_count == 0 || frameAdvance_Delay_count >= frameAdvance_Delay)
+			EmulationPaused = EMULATIONPAUSED_FA;
+		if (frameAdvance_Delay_count < frameAdvance_Delay)
+			frameAdvance_Delay_count++;
+	}
 
-// 	if (EmulationPaused & EMULATIONPAUSED_FA)
-// 	{
-// 		// the user is holding Frame Advance key
-// 		// clear paused flag temporarily
-// 		EmulationPaused &= ~EMULATIONPAUSED_PAUSED;
-// #ifdef WIN32
-// 		// different emulation speed when holding Frame Advance
-// 		if (fps_scale_frameadvance > 0)
-// 		{
-// 			fps_scale = fps_scale_frameadvance;
-// 			RefreshThrottleFPS();
-// 		}
-// #endif
-// 	} else
-// 	{
-// #ifdef WIN32
-// 		if (fps_scale_frameadvance > 0)
-// 		{
-// 			// restore emulation speed when Frame Advance is not held
-// 			fps_scale = fps_scale_unpaused;
-// 			RefreshThrottleFPS();
-// 		}
-// #endif
-// 		if (EmulationPaused & EMULATIONPAUSED_PAUSED)
-// 		{
-// 			// emulator is paused
-// #ifndef __EMSCRIPTEN__
-// 			memcpy(XBuf, XBackBuf, 256*256);
-// 			FCEU_PutImage();
-// #endif
-// 			*pXBuf = XBuf;
-// 			*SoundBuf = WaveFinal;
-// 			*SoundBufSize = 0;
-// 			return;
-// 		}
-// 	}
+	if (EmulationPaused & EMULATIONPAUSED_FA)
+	{
+		// the user is holding Frame Advance key
+		// clear paused flag temporarily
+		EmulationPaused &= ~EMULATIONPAUSED_PAUSED;
+#ifdef WIN32
+		// different emulation speed when holding Frame Advance
+		if (fps_scale_frameadvance > 0)
+		{
+			fps_scale = fps_scale_frameadvance;
+			RefreshThrottleFPS();
+		}
+#endif
+	} else
+	{
+#ifdef WIN32
+		if (fps_scale_frameadvance > 0)
+		{
+			// restore emulation speed when Frame Advance is not held
+			fps_scale = fps_scale_unpaused;
+			RefreshThrottleFPS();
+		}
+#endif
+		if (EmulationPaused & EMULATIONPAUSED_PAUSED)
+		{
+			// emulator is paused
+#ifndef __EMSCRIPTEN__
+			memcpy(XBuf, XBackBuf, 256*256);
+			FCEU_PutImage();
+#endif
+			*pXBuf = XBuf;
+			*SoundBuf = WaveFinal;
+			*SoundBufSize = 0;
+			return;
+		}
+	}
 
-// 	AutoFire();
-	// UpdateAutosave();
+	AutoFire();
+	//UpdateAutosave();
 
-// #ifdef _S9XLUA_H
-// 	FCEU_LuaFrameBoundary();
-// #endif
+#ifdef _S9XLUA_H
+	FCEU_LuaFrameBoundary();
+#endif
 
 	FCEU_UpdateInput();
-	// lagFlag = 1;
+	lagFlag = 1;
 
-// #ifdef _S9XLUA_H
-// 	CallRegisteredLuaFunctions(LUACALL_BEFOREEMULATION);
-// #endif
+#ifdef _S9XLUA_H
+	CallRegisteredLuaFunctions(LUACALL_BEFOREEMULATION);
+#endif
 
-	// if (geniestage != 1) FCEU_ApplyPeriodicCheats();
+	if (geniestage != 1) FCEU_ApplyPeriodicCheats();
 	r = FCEUPPU_Loop(skip);
 
-	// if (skip != 2) ssize = FlushEmulateSound();  //If skip = 2 we are skipping sound processing
+	if (skip != 2) ssize = FlushEmulateSound();  //If skip = 2 we are skipping sound processing
 
-// #ifdef _S9XLUA_H
-// 	CallRegisteredLuaFunctions(LUACALL_AFTEREMULATION);
-// #endif
+#ifdef _S9XLUA_H
+	CallRegisteredLuaFunctions(LUACALL_AFTEREMULATION);
+#endif
 
-// #ifdef WIN32
-// 	//These Windows only dialogs need to be updated only once per frame so they are included here
-// 	UpdateCheatList(); // CaH4e3: can't see why, this is only cause problems with selection - adelikat: selection is only a problem when not paused, it shoudl be paused to select, we want to see the values update
-// 	UpdateTextHooker();
-// 	Update_RAM_Search(); // Update_RAM_Watch() is also called.
-// 	RamChange();
-// 	//FCEUI_AviVideoUpdate(XBuf);
+#ifdef WIN32
+	//These Windows only dialogs need to be updated only once per frame so they are included here
+	UpdateCheatList(); // CaH4e3: can't see why, this is only cause problems with selection - adelikat: selection is only a problem when not paused, it shoudl be paused to select, we want to see the values update
+	UpdateTextHooker();
+	Update_RAM_Search(); // Update_RAM_Watch() is also called.
+	RamChange();
+	//FCEUI_AviVideoUpdate(XBuf);
 
-// 	extern int KillFCEUXonFrame;
-// 	if (KillFCEUXonFrame && (FCEUMOV_GetFrame() >= KillFCEUXonFrame))
-// 		DoFCEUExit();
-// #endif
+	extern int KillFCEUXonFrame;
+	if (KillFCEUXonFrame && (FCEUMOV_GetFrame() >= KillFCEUXonFrame))
+		DoFCEUExit();
+#endif
 
 	timestampbase += timestamp;
 	timestamp = 0;
 
-	// *pXBuf = skip ? 0 : XBuf;
-	// if (skip == 2) { //If skip = 2, then bypass sound
-	// 	*SoundBuf = 0;
-	// 	*SoundBufSize = 0;
-	// } else {
-	// 	*SoundBuf = WaveFinal;
-	// 	*SoundBufSize = ssize;
-	// }
+	*pXBuf = skip ? 0 : XBuf;
+	if (skip == 2) { //If skip = 2, then bypass sound
+		*SoundBuf = 0;
+		*SoundBufSize = 0;
+	} else {
+		*SoundBuf = WaveFinal;
+		*SoundBufSize = ssize;
+	}
 
-	// if ((EmulationPaused & EMULATIONPAUSED_FA) && (!frameAdvanceLagSkip || !lagFlag))
-	// //Lots of conditions here.  EmulationPaused & EMULATIONPAUSED_FA must be true.  In addition frameAdvanceLagSkip or lagFlag must be false
-	// // When Frame Advance is held, emulator is automatically paused after emulating one frame (or several lag frames)
-	// {
-	// 	EmulationPaused = EMULATIONPAUSED_PAUSED;		   // restore EMULATIONPAUSED_PAUSED flag and clear EMULATIONPAUSED_FA flag
-	// 	JustFrameAdvanced = true;
-	// 	#ifdef WIN32
-	// 	if (soundoptions & SO_MUTEFA)  //mute the frame advance if the user requested it
-	// 		*SoundBufSize = 0;         //keep sound muted
-	// 	#endif
-	// }
+	if ((EmulationPaused & EMULATIONPAUSED_FA) && (!frameAdvanceLagSkip || !lagFlag))
+	//Lots of conditions here.  EmulationPaused & EMULATIONPAUSED_FA must be true.  In addition frameAdvanceLagSkip or lagFlag must be false
+	// When Frame Advance is held, emulator is automatically paused after emulating one frame (or several lag frames)
+	{
+		EmulationPaused = EMULATIONPAUSED_PAUSED;		   // restore EMULATIONPAUSED_PAUSED flag and clear EMULATIONPAUSED_FA flag
+		JustFrameAdvanced = true;
+		#ifdef WIN32
+		if (soundoptions & SO_MUTEFA)  //mute the frame advance if the user requested it
+			*SoundBufSize = 0;         //keep sound muted
+		#endif
+	}
 
-	// if (lagFlag) {
-	// 	lagCounter++;
-	// 	justLagged = true;
-	// } else justLagged = false;
+	if (lagFlag) {
+		lagCounter++;
+		justLagged = true;
+	} else justLagged = false;
 
-	// if (movieSubtitles)
-	// 	ProcessSubtitles();
+	if (movieSubtitles)
+		ProcessSubtitles();
 }
 
 void FCEUI_CloseGame(void) {

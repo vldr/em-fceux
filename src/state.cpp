@@ -386,7 +386,7 @@ static bool ReadStateChunks(EMUFILE* is, int32 totalsize)
 int CurrentState=0;
 extern int geniestage;
 
-const int MAX_SAVES = 32;
+const int MAX_SAVES = 64;
 uint8_t save[MAX_SAVES][4668];
 
 void save_please(int index)
