@@ -27,6 +27,8 @@ enum ENUM_SSLOADPARAMS
 extern uint32_t frameCount;
 extern uint32_t em_controller_bits;
 
+extern uint8_t save[64][78404];
+
 void save_please(int index);
 void load_please(int index);
 

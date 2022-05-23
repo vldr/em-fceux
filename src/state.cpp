@@ -131,6 +131,7 @@ SFORMAT SFCPU[]={
 	{ &RAM, 0x800 | FCEUSTATE_INDIRECT, "RAM", },
 	{ &frameCount, sizeof(frameCount), "FRAMECOUNT" },
 	{ &em_controller_bits, sizeof(em_controller_bits), "CONTBITS" },
+	{ &XBuf, 65544 | FCEUSTATE_INDIRECT, "XBUF" },
 	{ 0 }
 };
 
@@ -386,12 +387,11 @@ static bool ReadStateChunks(EMUFILE* is, int32 totalsize)
 int CurrentState=0;
 extern int geniestage;
 
-const int MAX_SAVES = 64;
-uint8_t save[MAX_SAVES][4668];
+uint8_t save[64][78404];
 
 void save_please(int index)
 {
-	SFORMAT* sformat_list[8] = { SFCPU, SFCPUC, FCEUPPU_STATEINFO, FCEU_NEWPPU_STATEINFO, FCEUCTRL_STATEINFO, FCEUSND_STATEINFO, FCEUMOV_STATEINFO, NULL };
+	SFORMAT* sformat_list[9] = { SFCPU, SFCPUC, FCEUPPU_STATEINFO, FCEU_NEWPPU_STATEINFO, FCEUCTRL_STATEINFO, FCEUSND_STATEINFO, FCEUMOV_STATEINFO, SFMDATA, NULL };
 	uint32_t offset = 0;
 
 	FCEUPPU_SaveState();
@@ -420,7 +420,7 @@ void save_please(int index)
 
 void load_please(int index)
 {
-	SFORMAT* sformat_list[8] = { SFCPU, SFCPUC, FCEUPPU_STATEINFO, FCEU_NEWPPU_STATEINFO, FCEUCTRL_STATEINFO, FCEUSND_STATEINFO, FCEUMOV_STATEINFO, NULL };
+	SFORMAT* sformat_list[9] = { SFCPU, SFCPUC, FCEUPPU_STATEINFO, FCEU_NEWPPU_STATEINFO, FCEUCTRL_STATEINFO, FCEUSND_STATEINFO, FCEUMOV_STATEINFO, SFMDATA, NULL };
 	uint32_t offset = 0;
 
 	for (int i = 0; sformat_list[i] != NULL; i++)

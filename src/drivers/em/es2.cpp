@@ -102,7 +102,7 @@ void genLookupTex()
 // Get uniformly distributed random number in [0,1] range.
 static double rand01()
 {
-    return emscripten_random();
+    return 0.5;
 }
 
 static void genNoiseTex()
